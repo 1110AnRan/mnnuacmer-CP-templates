@@ -1,0 +1,51 @@
+\documentclass[a4paper, 12pt]{article}
+
+\input{setup.tex}
+
+\setlength{\headheight}{28.74066pt}
+\addtolength{\topmargin}{-16.74066pt}
+
+% 文档开始
+\begin{document}
+
+
+\coverpage
+
+\input{data/abstract.tex}
+\thispagestyle{plain}
+\newpage
+
+% ==========   目录  ==========
+\tableofcontents
+\thispagestyle{plain}
+
+\newpage
+
+% 正文内容style
+\pagestyle{mainstyle}
+\setcounter{page}{1}
+% ========== 模板内容 ==========
+
+% 数据结构专题模板
+\input{data/ds.tex}
+
+% 图论专题模板
+\input{data/graph.tex}
+
+% 树论专题模板
+\input{data/tree.tex}
+
+% 数学专题模板
+\input{data/math.tex}
+
+% 字符串
+\input{data/string.tex}
+
+% 算法杂项专题模板
+\input{data/misc.tex}
+
+% 平面几何专题模板
+\input{data/geometry.tex}
+
+
+\end{document}

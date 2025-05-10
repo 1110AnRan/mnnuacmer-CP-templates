@@ -1,0 +1,806 @@
+\section{数学专题模板}
+
+\subsection{Exgcd}
+\begin{lstlisting}
+int exgcd(int a, int b, int &x, int &y) {
+	if (b == 0) {
+		x = 1, y = 0;
+		return a;
+	}
+	int d = exgcd(b, a % b, y, x);
+	y -= (a / b * x);
+	return d;
+}
+\end{lstlisting}
+
+\subsection{Frac}
+\begin{lstlisting}
+template<class T>
+struct Frac {
+    T num;
+    T den;
+    Frac(T num_, T den_) : num(num_), den(den_) {
+        if (den < 0) {
+            den = -den;
+            num = -num;
+        }
+    }
+    Frac() : Frac(0, 1) {}
+    Frac(T num_) : Frac(num_, 1) {}
+    explicit operator double() const {
+        return 1. * num / den;
+    }
+    Frac &operator+=(const Frac &rhs) {
+        num = num * rhs.den + rhs.num * den;
+        den *= rhs.den;
+        return *this;
+    }
+    Frac &operator-=(const Frac &rhs) {
+        num = num * rhs.den - rhs.num * den;
+        den *= rhs.den;
+        return *this;
+    }
+    Frac &operator*=(const Frac &rhs) {
+        num *= rhs.num;
+        den *= rhs.den;
+        return *this;
+    }
+    Frac &operator/=(const Frac &rhs) {
+        num *= rhs.den;
+        den *= rhs.num;
+        if (den < 0) {
+            num = -num;
+            den = -den;
+        }
+        return *this;
+    }
+    friend Frac operator+(Frac lhs, const Frac &rhs) {
+        return lhs += rhs;
+    }
+    friend Frac operator-(Frac lhs, const Frac &rhs) {
+        return lhs -= rhs;
+    }
+    friend Frac operator*(Frac lhs, const Frac &rhs) {
+        return lhs *= rhs;
+    }
+    friend Frac operator/(Frac lhs, const Frac &rhs) {
+        return lhs /= rhs;
+    }
+    friend Frac operator-(const Frac &a) {
+        return Frac(-a.num, a.den);
+    }
+    friend bool operator==(const Frac &lhs, const Frac &rhs) {
+        return lhs.num * rhs.den == rhs.num * lhs.den;
+    }
+    friend bool operator!=(const Frac &lhs, const Frac &rhs) {
+        return lhs.num * rhs.den != rhs.num * lhs.den;
+    }
+    friend bool operator<(const Frac &lhs, const Frac &rhs) {
+        return lhs.num * rhs.den < rhs.num * lhs.den;
+    }
+    friend bool operator>(const Frac &lhs, const Frac &rhs) {
+        return lhs.num * rhs.den > rhs.num * lhs.den;
+    }
+    friend bool operator<=(const Frac &lhs, const Frac &rhs) {
+        return lhs.num * rhs.den <= rhs.num * lhs.den;
+    }
+    friend bool operator>=(const Frac &lhs, const Frac &rhs) {
+        return lhs.num * rhs.den >= rhs.num * lhs.den;
+    }
+    friend std::ostream &operator<<(std::ostream &os, Frac x) {
+        T g = std::gcd(x.num, x.den);
+        if (x.den == g) {
+            return os << x.num / g;
+        } else {
+            return os << x.num / g << "/" << x.den / g;
+        }
+    }
+};
+\end{lstlisting}
+
+\subsection{ModInt}
+\begin{lstlisting}
+template<class T>
+constexpr T power(T a, u64 b, T res = 1) {
+    for (; b != 0; b /= 2, a *= a) {
+        if (b & 1) {
+            res *= a;
+        }
+    }
+    return res;
+}
+ 
+template<u32 P>
+constexpr u32 mulMod(u32 a, u32 b) {
+    return u64(a) * b % P;
+}
+ 
+template<u64 P>
+constexpr u64 mulMod(u64 a, u64 b) {
+    u64 res = a * b - u64(1.L * a * b / P - 0.5L) * P;
+    res %= P;
+    return res;
+}
+ 
+constexpr i64 safeMod(i64 x, i64 m) {
+    x %= m;
+    if (x < 0) {
+        x += m;
+    }
+    return x;
+}
+ 
+constexpr std::pair<i64, i64> invGcd(i64 a, i64 b) {
+    a = safeMod(a, b);
+    if (a == 0) {
+        return {b, 0};
+    }
+    
+    i64 s = b, t = a;
+    i64 m0 = 0, m1 = 1;
+ 
+    while (t) {
+        i64 u = s / t;
+        s -= t * u;
+        m0 -= m1 * u;
+        
+        std::swap(s, t);
+        std::swap(m0, m1);
+    }
+    
+    if (m0 < 0) {
+        m0 += b / s;
+    }
+    
+    return {s, m0};
+}
+ 
+template<std::unsigned_integral U, U P>
+struct ModIntBase {
+public:
+    constexpr ModIntBase() : x(0) {}
+    template<std::unsigned_integral T>
+    constexpr ModIntBase(T x_) : x(x_ % mod()) {}
+    template<std::signed_integral T>
+    constexpr ModIntBase(T x_) {
+        using S = std::make_signed_t<U>;
+        S v = x_ % S(mod());
+        if (v < 0) {
+            v += mod();
+        }
+        x = v;
+    }
+    
+    constexpr static U mod() {
+        return P;
+    }
+    
+    constexpr U val() const {
+        return x;
+    }
+    
+    constexpr ModIntBase operator-() const {
+        ModIntBase res;
+        res.x = (x == 0 ? 0 : mod() - x);
+        return res;
+    }
+    
+    constexpr ModIntBase inv() const {
+        return power(*this, mod() - 2);
+    }
+    
+    constexpr ModIntBase &operator*=(const ModIntBase &rhs) & {
+        x = mulMod<mod()>(x, rhs.val());
+        return *this;
+    }
+    constexpr ModIntBase &operator+=(const ModIntBase &rhs) & {
+        x += rhs.val();
+        if (x >= mod()) {
+            x -= mod();
+        }
+        return *this;
+    }
+    constexpr ModIntBase &operator-=(const ModIntBase &rhs) & {
+        x -= rhs.val();
+        if (x >= mod()) {
+            x += mod();
+        }
+        return *this;
+    }
+    constexpr ModIntBase &operator/=(const ModIntBase &rhs) & {
+        return *this *= rhs.inv();
+    }
+    
+    friend constexpr ModIntBase operator*(ModIntBase lhs, const ModIntBase &rhs) {
+        lhs *= rhs;
+        return lhs;
+    }
+    friend constexpr ModIntBase operator+(ModIntBase lhs, const ModIntBase &rhs) {
+        lhs += rhs;
+        return lhs;
+    }
+    friend constexpr ModIntBase operator-(ModIntBase lhs, const ModIntBase &rhs) {
+        lhs -= rhs;
+        return lhs;
+    }
+    friend constexpr ModIntBase operator/(ModIntBase lhs, const ModIntBase &rhs) {
+        lhs /= rhs;
+        return lhs;
+    }
+    
+    friend constexpr std::istream &operator>>(std::istream &is, ModIntBase &a) {
+        i64 i;
+        is >> i;
+        a = i;
+        return is;
+    }
+    friend constexpr std::ostream &operator<<(std::ostream &os, const ModIntBase &a) {
+        return os << a.val();
+    }
+    
+    friend constexpr std::strong_ordering operator<=>(ModIntBase lhs, ModIntBase rhs) {
+        return lhs.val() <=> rhs.val();
+    }
+    
+private:
+    U x;
+};
+ 
+template<u32 P>
+using ModInt = ModIntBase<u32, P>;
+template<u64 P>
+using ModInt64 = ModIntBase<u64, P>;
+ 
+struct Barrett {
+public:
+    Barrett(u32 m_) : m(m_), im((u64)(-1) / m_ + 1) {}
+ 
+    constexpr u32 mod() const {
+        return m;
+    }
+ 
+    constexpr u32 mul(u32 a, u32 b) const {
+        u64 z = a;
+        z *= b;
+        
+        u64 x = u64((u128(z) * im) >> 64);
+        
+        u32 v = u32(z - x * m);
+        if (m <= v) {
+            v += m;
+        }
+        return v;
+    }
+ 
+private:
+    u32 m;
+    u64 im;
+};
+ 
+template<u32 Id>
+struct DynModInt {
+public:
+    constexpr DynModInt() : x(0) {}
+    template<std::unsigned_integral T>
+    constexpr DynModInt(T x_) : x(x_ % mod()) {}
+    template<std::signed_integral T>
+    constexpr DynModInt(T x_) {
+        int v = x_ % int(mod());
+        if (v < 0) {
+            v += mod();
+        }
+        x = v;
+    }
+    
+    constexpr static void setMod(u32 m) {
+        bt = m;
+    }
+    
+    static u32 mod() {
+        return bt.mod();
+    }
+    
+    constexpr u32 val() const {
+        return x;
+    }
+    
+    constexpr DynModInt operator-() const {
+        DynModInt res;
+        res.x = (x == 0 ? 0 : mod() - x);
+        return res;
+    }
+    
+    constexpr DynModInt inv() const {
+        auto v = invGcd(x, mod());
+        assert(v.first == 1);
+        return v.second;
+    }
+    
+    constexpr DynModInt &operator*=(const DynModInt &rhs) & {
+        x = bt.mul(x, rhs.val());
+        return *this;
+    }
+    constexpr DynModInt &operator+=(const DynModInt &rhs) & {
+        x += rhs.val();
+        if (x >= mod()) {
+            x -= mod();
+        }
+        return *this;
+    }
+    constexpr DynModInt &operator-=(const DynModInt &rhs) & {
+        x -= rhs.val();
+        if (x >= mod()) {
+            x += mod();
+        }
+        return *this;
+    }
+    constexpr DynModInt &operator/=(const DynModInt &rhs) & {
+        return *this *= rhs.inv();
+    }
+    
+    friend constexpr DynModInt operator*(DynModInt lhs, const DynModInt &rhs) {
+        lhs *= rhs;
+        return lhs;
+    }
+    friend constexpr DynModInt operator+(DynModInt lhs, const DynModInt &rhs) {
+        lhs += rhs;
+        return lhs;
+    }
+    friend constexpr DynModInt operator-(DynModInt lhs, const DynModInt &rhs) {
+        lhs -= rhs;
+        return lhs;
+    }
+    friend constexpr DynModInt operator/(DynModInt lhs, const DynModInt &rhs) {
+        lhs /= rhs;
+        return lhs;
+    }
+    
+    friend constexpr std::istream &operator>>(std::istream &is, DynModInt &a) {
+        i64 i;
+        is >> i;
+        a = i;
+        return is;
+    }
+    friend constexpr std::ostream &operator<<(std::ostream &os, const DynModInt &a) {
+        return os << a.val();
+    }
+    
+    friend constexpr std::strong_ordering operator<=>(DynModInt lhs, DynModInt rhs) {
+        return lhs.val() <=> rhs.val();
+    }
+    
+private:
+    u32 x;
+    static Barrett bt;
+};
+
+constexpr int MOD = 1'000'000'007;
+// constexpr int MOD = 998'244'353;
+ 
+template<u32 Id>
+Barrett DynModInt<Id>::bt = MOD;
+ 
+using Z = ModInt<MOD>;
+\end{lstlisting}
+
+\subsection{Sieve}
+\begin{lstlisting}
+// 输入：n - 筛的范围上限
+// 输出：
+//   primes       - 质数集合
+//   min_prime    - 每个数的最小质因子
+//   phi         - 欧拉函数值
+//   mu          - 莫比乌斯函数值
+//   d           - 约数个数
+//   cnt_min_p   - 最小质因子的次数
+std::vector<int> primes, min_prime, phi, mu, d, cnt_min_p;
+std::vector<bool> is_prime;
+void euler_sieve(int n) {
+    min_prime.resize(n + 1, 0);
+    phi.resize(n + 1, 0);
+    mu.resize(n + 1, 0);
+    d.resize(n + 1, 0);
+    cnt_min_p.resize(n + 1, 0);
+    is_prime.resize(n + 1, true);
+    phi[1] = mu[1] = d[1] = 1;
+    for(int i = 2; i <= n; i++) {
+        if(is_prime[i]) {
+            primes.push_back(i);
+            min_prime[i] = i;
+            phi[i] = i - 1;
+            mu[i] = -1;
+            d[i] = 2;
+            cnt_min_p[i] = 1;
+        }
+        for(auto p : primes) {
+            int num = i * p;
+            if(num > n) {
+                break;
+            }
+            is_prime[num] = false;
+            min_prime[num] = p;
+            if(i % p == 0) {
+                phi[num] = phi[i] * p;
+                mu[num] = 0;
+                cnt_min_p[num] = cnt_min_p[i] + 1;
+                d[num] = d[i] / (cnt_min_p[i] + 1) * (cnt_min_p[i] + 1);
+                break;
+            } else {
+                phi[num] = phi[i] * (p - 1);
+                mu[num] = -mu[i];
+                cnt_min_p[num] = 1;
+                d[num] = d[i] * 2;
+            }
+        }
+    }
+}
+\end{lstlisting}
+
+\subsection{Comb(结合ModInt)}
+\begin{lstlisting}
+struct Comb {
+    int n;
+    std::vector<Z> _fac;
+    std::vector<Z> _invfac;
+    std::vector<Z> _inv;
+    
+    Comb() : n{0}, _fac{1}, _invfac{1}, _inv{0} {}
+    Comb(int n) : Comb() {
+        init(n);
+    }
+    
+    void init(int m) {
+        if (m <= n) return;
+        _fac.resize(m + 1);
+        _invfac.resize(m + 1);
+        _inv.resize(m + 1);
+        
+        for (int i = n + 1; i <= m; i++) {
+            _fac[i] = _fac[i - 1] * i;
+        }
+        _invfac[m] = _fac[m].inv();
+        for (int i = m; i > n; i--) {
+            _invfac[i - 1] = _invfac[i] * i;
+            _inv[i] = _invfac[i] * _fac[i - 1];
+        }
+        n = m;
+    }
+    
+    Z fac(int m) {
+        if (m > n) init(2 * m);
+        return _fac[m];
+    }
+    Z invfac(int m) {
+        if (m > n) init(2 * m);
+        return _invfac[m];
+    }
+    Z inv(int m) {
+        if (m > n) init(2 * m);
+        return _inv[m];
+    }
+    Z C(int n, int m) {
+        if (n < m || m < 0) return 0;
+        return fac(n) * invfac(m) * invfac(n - m);
+    }
+    Z A(int n, int m) {
+        if(n < m || m < 0) return 0;
+        return fac(n) * invfac(n - m);
+    }
+} comb;
+\end{lstlisting}
+
+\subsection{BigInt}
+\begin{lstlisting}
+constexpr int BASE = 100000000;
+constexpr int MAX_LENGTH = 1000;
+constexpr int NUM_DIGIT = 8;
+i64 mul_mod (i64 x, i64 y, i64 n){
+	i64 T = std::floor(std::sqrt(n) + 0.5);
+	i64 t = T * T - n;
+	i64 a = x / T; i64 b = x % T;
+	i64 c = y / T; i64 d = y % T;
+	i64 e = a * c / T; i64 f = a * c % T;
+	i64 v = ((a * d + b * c) % n + e * t) % n;
+	i64 g = v / T; i64 h = v % T;
+	i64 ans = (((f + g) * t % n + b * d) % n + h * T) % n;
+	while (ans < 0) {
+		ans += n;
+	}
+	return ans;
+}
+struct BigInt {
+
+	BigInt(const char* str = "0") {
+		(*this) = str;
+	}
+
+	BigInt operator=(const char* str) {
+		int j = std::strlen(str) - 1;
+		len = j / NUM_DIGIT + 1;
+		for(int i = 0; i <= len; i++) {
+			s[i] = 0;
+		}
+		for(int i = 0; i <= j; i++) {
+			int k = (j - i) / NUM_DIGIT + 1;
+			s[k] = s[k] * 10 + (str[i] - '0');
+		}
+		return *this;
+	}
+
+	void print() {
+		printf("%d", s[len]);
+		for(int i = len - 1; i >= 1; i--) {
+			printf("%0*d", NUM_DIGIT, s[i]);
+		}
+	}
+
+	int len;
+	int s[MAX_LENGTH];
+};
+
+// > return > 0
+// < return < 0
+// = return = 0
+int compare(const BigInt &lhs, const BigInt &rhs) {
+	if(lhs.len > rhs.len) {
+		return 1;
+	}
+	if(lhs.len < rhs.len) {
+		return -1;
+	}
+	int cur = lhs.len;
+	while((cur > 1) && (lhs.s[cur] == rhs.s[cur])) {
+		cur--;
+	}
+	return lhs.s[cur] - rhs.s[cur];
+}
+
+bool operator<(const BigInt &lhs, const BigInt &rhs) {
+	return compare(lhs, rhs) < 0;
+}
+
+bool operator<=(const BigInt &lhs, const BigInt &rhs) {
+	return compare(lhs, rhs) <= 0;
+}
+
+bool operator>(const BigInt &lhs, const BigInt &rhs) {
+	return compare(lhs, rhs) > 0;
+}
+
+bool operator>=(const BigInt &lhs, const BigInt &rhs) {
+	return compare(lhs, rhs) >= 0;
+}
+
+bool operator==(const BigInt &lhs, const BigInt &rhs) {
+	return compare(lhs, rhs) == 0;
+}
+
+bool operator!=(const BigInt &lhs, const BigInt &rhs) {
+	return compare(lhs, rhs) != 0;
+}
+
+
+BigInt operator+(const BigInt &lhs, const BigInt &rhs) {
+	BigInt ret;
+	int i;
+	for(i = 1; i <= lhs.len || i <= rhs.len || ret.s[i]; i++) {
+		if(i <= lhs.len) {
+			ret.s[i] += lhs.s[i];
+		}
+		if(i <= rhs.len) {
+			ret.s[i] += rhs.s[i];
+		}
+		ret.s[i + 1] = ret.s[i] / BASE;
+		ret.s[i] %= BASE;
+	}
+	ret.len = i - 1;
+	if(ret.len == 0) {
+		ret.len = 1;
+	}
+	return ret;
+}
+
+// lhs > rhs
+BigInt operator-(const BigInt &lhs, const BigInt &rhs) {
+	BigInt ret;
+	for(int i = 1, j = 0; i <= lhs.len; i++) {
+		ret.s[i] = lhs.s[i] - j;
+		if(i <= rhs.len) {
+			ret.s[i] -= rhs.s[i];
+		}
+		if(ret.s[i] < 0) {
+			j = 1;
+			ret.s[i] += BASE;
+		} else {
+			j = 0;
+		}
+	}
+	ret.len = lhs.len;
+	while(ret.len > 1 && !ret.s[ret.len]) {
+		ret.len--;
+	}
+	return ret;
+}
+
+BigInt operator*(const BigInt &lhs, const BigInt &rhs) {
+	BigInt ret;
+	i64 g = 0;
+	ret.len = lhs.len + rhs.len;
+	ret.s[0] = 0;
+	for(int i = 1; i <= ret.len; i++) {
+		ret.s[i] = 0;
+	}
+	for(int k = 1; k <= ret.len; k++) {
+		i64 tmp = g;
+		int j = k + 1 - rhs.len;
+		if(j < 1) {
+			j = 1;
+		}
+		for(; j <= k && j <= lhs.len; j++) {
+			tmp += (i64)lhs.s[j] * (i64)rhs.s[k + 1 - j];
+		}
+		g = tmp / BASE;
+		ret.s[k] = tmp % BASE;
+	}
+	while(ret.len > 1 && !ret.s[ret.len]) {
+		ret.len--;
+	}
+	return ret;
+}
+BigInt operator/(const BigInt &lhs, int num) {
+	i64 g = 0;
+	BigInt ret;
+	ret.len = lhs.len;
+	for(int i = lhs.len; i > 0; i--) {
+		i64 tmp = g * BASE + lhs.s[i];
+		ret.s[i] = tmp / num;
+		g = tmp % num;
+	}
+	while(ret.len > 1 && ! ret.s[ret.len]) {
+		ret.len--;
+	}
+	return ret;
+}
+BigInt operator/(const BigInt &lhs, const BigInt &rhs) {
+	BigInt l = "0", r = lhs;
+	while(l < r) {
+		BigInt m = l + (r - l + "1") / 2;
+		if(m * rhs <= lhs) {
+			l = m;
+		} else {
+			r = m - "1";
+		}
+	}
+	return l;
+}
+
+i64 BigMod(const BigInt &a, i64 m) {
+	i64 d = 0;
+	for(int i = a.len; i > 0; i--) {
+		d = mul_mod(d, BASE, m);
+		d = (d + a.s[i]) % m;
+	}
+	return d;
+}
+BigInt sqrt(const BigInt &a) {
+	BigInt x, y = a;
+	do {
+		x = y;
+		y = (x + a / x) / 2;
+	}while(y < x);
+
+	return x;
+}
+BigInt gcd(BigInt a, BigInt b) {
+	BigInt c = "1";
+	while(true) {
+		if(a == b) {
+			return a * c;
+		} else if(a.s[1] % 2 == 0 && b.s[1] % 2 == 0) {
+			a = a / 2;
+			b = b / 2;
+			c = c * "2";
+		} else if(a.s[1] % 2 == 0) {
+			a = a / 2;
+		} else if(b.s[1] % 2 == 0) {
+			b = b / 2;
+		} else if(b < a) {
+			a = a - b;
+		} else {
+			b = b - a;
+		}
+	}
+}
+\end{lstlisting}
+
+\subsection{Miller-RabinAndPollard-Rho}
+\begin{lstlisting}
+i64 mul(i64 a, i64 b, i64 m) {
+    return static_cast<__int128>(a) * b % m;
+}
+i64 power(i64 a, i64 b, i64 m) {
+    i64 res = 1 % m;
+    for (; b; b >>= 1, a = mul(a, a, m))
+        if (b & 1)
+            res = mul(res, a, m);
+    return res;
+}
+bool isprime(i64 n) {
+    if (n < 2)
+        return false;
+    static constexpr int A[] = {2, 3, 5, 7, 11, 13, 17, 19, 23};
+    int s = __builtin_ctzll(n - 1);
+    i64 d = (n - 1) >> s;
+    for (auto a : A) {
+        if (a == n)
+            return true;
+        i64 x = power(a, d, n);
+        if (x == 1 || x == n - 1)
+            continue;
+        bool ok = false;
+        for (int i = 0; i < s - 1; ++i) {
+            x = mul(x, x, n);
+            if (x == n - 1) {
+                ok = true;
+                break;
+            }
+        }
+        if (!ok)
+            return false;
+    }
+    return true;
+}
+std::vector<i64> factorize(i64 n) {
+    std::vector<i64> p;
+    std::function<void(i64)> f = [&](i64 n) {
+        if (n <= 10000) {
+            for (int i = 2; i * i <= n; ++i)
+                for (; n % i == 0; n /= i)
+                    p.push_back(i);
+            if (n > 1)
+                p.push_back(n);
+            return;
+        }
+        if (isprime(n)) {
+            p.push_back(n);
+            return;
+        }
+        auto g = [&](i64 x) {
+            return (mul(x, x, n) + 1) % n;
+        };
+        i64 x0 = 2;
+        while (true) {
+            i64 x = x0;
+            i64 y = x0;
+            i64 d = 1;
+            i64 power = 1, lam = 0;
+            i64 v = 1;
+            while (d == 1) {
+                y = g(y);
+                ++lam;
+                v = mul(v, std::abs(x - y), n);
+                if (lam % 127 == 0) {
+                    d = std::gcd(v, n);
+                    v = 1;
+                }
+                if (power == lam) {
+                    x = y;
+                    power *= 2;
+                    lam = 0;
+                    d = std::gcd(v, n);
+                    v = 1;
+                }
+            }
+            if (d != n) {
+                f(d);
+                f(n / d);
+                return;
+            }
+            ++x0;
+        }
+    };
+    f(n);
+    std::sort(p.begin(), p.end());
+    return p;
+}
+\end{lstlisting}

@@ -1,0 +1,605 @@
+\section{树论专题模板}
+\subsection{BlockCutTree}
+\begin{lstlisting}
+struct BlockCutTree {
+    int n;
+    std::vector<std::vector<int>> adj;
+    std::vector<int> dfn, low, stk;
+    int cnt, cur;
+    std::vector<std::pair<int, int>> edges;
+    
+    BlockCutTree() {}
+    BlockCutTree(int n) {
+        init(n);
+    }
+    
+    void init(int n) {
+        this->n = n;
+        adj.assign(n, {});
+        dfn.assign(n, -1);
+        low.resize(n);
+        stk.clear();
+        cnt = cur = 0;
+        edges.clear();
+    }
+    
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    
+    void dfs(int x) {
+        stk.push_back(x);
+        dfn[x] = low[x] = cur++;
+        
+        for (auto y : adj[x]) {
+            if (dfn[y] == -1) {
+                dfs(y);
+                low[x] = std::min(low[x], low[y]);
+                if (low[y] == dfn[x]) {
+                    int v;
+                    do {
+                        v = stk.back();
+                        stk.pop_back();
+                        edges.emplace_back(n + cnt, v);
+                    } while (v != y);
+                    edges.emplace_back(x, n + cnt);
+                    cnt++;
+                }
+            } else {
+                low[x] = std::min(low[x], dfn[y]);
+            }
+        }
+    }
+    
+    std::pair<int, std::vector<std::pair<int, int>>> work() {
+        for (int i = 0; i < n; i++) {
+            if (dfn[i] == -1) {
+                stk.clear();
+                dfs(i);
+            }
+        }
+        return {cnt, edges};
+    }
+};
+\end{lstlisting}
+
+\subsection{树的重心}
+\begin{lstlisting}
+struct CodeOfTree {
+    int n, cur;
+    std::vector<std::vector<int>> adj;
+    std::vector<int> siz, dep, p, in, ord;
+    CodeOfTree() = default;
+
+    CodeOfTree(int _n) {
+        init(_n);
+    }
+
+    void init(int _n) {
+        this->n = _n;
+        cur = 0;
+        adj.assign(n, {});
+        siz.resize(n);
+        dep.resize(n);
+        p.resize(n);
+        in.resize(n);
+        ord.resize(n);
+    }
+
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+
+    void dfs(int u) {
+        siz[u] = 1;
+        in[u] = cur++;
+        ord[in[u]] = u;
+        for(auto v : adj[u]) {
+            if(v == p[u]) {
+                continue;
+            }
+            p[v] = u;
+            dep[v] = dep[u] + 1;
+            dfs(v);
+            siz[u] += siz[v];
+        }
+    }
+
+    int find(int u) {
+        for(auto v : adj[u]) {
+            if(v == p[u] || 2 * siz[v] <= n) {
+                continue;
+            }
+            return find(v);
+        }
+        return u;
+    }
+
+    void work() {
+        p[0] = -1;
+        dfs(0);
+        int rt = find(0);
+        dep[rt] = 0;
+        p[rt] = -1;
+        cur = 0;
+        dfs(rt);
+    }
+};
+\end{lstlisting}
+
+\subsection{树的直径}
+\begin{lstlisting}
+struct Diameter {  
+    int n, start, end;
+    std::vector<std::vector<int>> adj;
+    std::vector<int> pa;
+
+    Diameter() = default;
+    Diameter(int _n) {
+        init(_n);
+    }
+
+    void init(int _n) {
+        this->n = _n;
+        start = end = -1;
+        adj.assign(n, {});
+        pa.resize(n);
+        std::iota(pa.begin(), pa.end(), 0);
+    }
+
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+
+    std::pair<int, int> dfs(int u, int fa, std::vector<bool>& vis) {
+        std::pair<int, int> ans{1, u};
+        pa[u] = fa;
+        vis[u] = true;
+        for(auto v : adj[u]) {
+            if(v == fa || vis[v]) {
+                continue;
+            }
+            auto pi = dfs(v, u, vis);
+            pi.first += 1;
+            ans = max(ans, pi);
+        }
+        return ans;
+    }
+
+    std::pair<int, int> work() {
+        std::vector<bool> vis(n);
+        auto [d1, ss] = dfs(0, -1, vis);
+        auto [d2, ee] = dfs(ss, -1, vis);
+        start = ss, end = ee;
+        return std::make_pair(start, end);
+    }
+
+    /* default = end -> start */
+    std::vector<int> getPath() {
+        std::vector<int> v;
+        int cur = end;
+        while(cur != -1) {
+            v.push_back(cur);
+            cur = pa[cur];
+        }
+        // std::reverse(v.begin(), v.end());
+        return v;
+    }
+};
+\end{lstlisting}
+
+\subsection{笛卡尔树}
+\begin{lstlisting}
+template<class T>
+struct DescartesTree {
+
+	std::vector<int> lch, rch, stk;
+
+	DescartesTree() {}
+
+	DescartesTree(const std::vector<T>& v) {
+		work(v);
+	}
+
+	void work(const std::vector<T>& v) {
+		int n = v.size();
+		lch.resize(n, n);
+		rch.resize(n, n);
+		for(int i = 0; i < n; i++) {
+			while(!stk.empty() && v[i] < v[stk.back()]) {
+				rch[stk.back()] = lch[i];
+				lch[i] = stk.back();
+				stk.pop_back();
+			}
+			stk.push_back(i);
+		}
+		while(stk.size() > 1) {
+			int x = stk.back();
+			stk.pop_back();
+			rch[stk.back()] = x;
+		}
+	}
+};
+\end{lstlisting}
+
+\subsection{HLD}
+\begin{lstlisting}
+struct HLD {
+    int n;
+    std::vector<int> siz, top, dep, parent, in, out, seq, son;
+    std::vector<std::vector<int>> adj;
+    int cur;
+    
+    HLD() {}
+    HLD(int n) {
+        init(n);
+    }
+    void init(int n) {
+        this->n = n;
+        siz.resize(n);
+        top.resize(n);
+        dep.resize(n);
+        parent.resize(n);
+        in.resize(n);
+        out.resize(n);
+        seq.resize(n);
+        son.resize(n);
+        cur = 0;
+        adj.assign(n, {});
+    }
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    void work(int root = 0) {
+        top[root] = root;
+        dep[root] = 0;
+        parent[root] = -1;
+        dfs1(root);
+        dfs2(root);
+    }
+    void dfs1(int u) {
+        if (parent[u] != -1) {
+            adj[u].erase(std::find(adj[u].begin(), adj[u].end(), parent[u]));
+        }
+        
+        siz[u] = 1;
+        for (auto &v : adj[u]) {
+            parent[v] = u;
+            dep[v] = dep[u] + 1;
+            dfs1(v);
+            siz[u] += siz[v];
+            if (siz[v] > siz[adj[u][0]]) {
+                son[u] = v;
+                std::swap(v, adj[u][0]);
+            }
+        }
+    }
+    void dfs2(int u) {
+        in[u] = cur++;
+        seq[in[u]] = u;
+        for (auto v : adj[u]) {
+            top[v] = v == adj[u][0] ? top[u] : v;
+            dfs2(v);
+        }
+        out[u] = cur;
+    }
+    int lca(int u, int v) {
+        while (top[u] != top[v]) {
+            if (dep[top[u]] > dep[top[v]]) {
+                u = parent[top[u]];
+            } else {
+                v = parent[top[v]];
+            }
+        }
+        return dep[u] < dep[v] ? u : v;
+    }
+    
+    int dist(int u, int v) {
+        return dep[u] + dep[v] - 2 * dep[lca(u, v)];
+    }
+    
+    int jump(int u, int k) {
+        if (dep[u] < k) {
+            return -1;
+        }
+        
+        int d = dep[u] - k;
+        
+        while (dep[top[u]] > d) {
+            u = parent[top[u]];
+        }
+        
+        return seq[in[u] - dep[u] + d];
+    }
+    
+    /* 
+     * 判断u是否是v的祖先
+    */
+    bool isAncester(int u, int v) {
+        return in[u] <= in[v] && in[v] < out[u];
+    }
+    
+    int rootedParent(int u, int v) {
+        std::swap(u, v);
+        if (u == v) {
+            return u;
+        }
+        if (!isAncester(u, v)) {
+            return parent[u];
+        }
+        auto it = std::upper_bound(adj[u].begin(), adj[u].end(), v, [&](int x, int y) {
+            return in[x] < in[y];
+        }) - 1;
+        return *it;
+    }
+    
+
+    /*
+     * 返回在以 v 为根时，节点 u 的子树大小。
+    */
+    int rootedSize(int u, int v) {
+        if (u == v) {
+            return n;
+        }
+        if (!isAncester(v, u)) {
+            return siz[v];
+        }
+        return n - siz[rootedParent(u, v)];
+    }
+    
+    int rootedLca(int a, int b, int c) {
+        return lca(a, b) ^ lca(b, c) ^ lca(c, a);
+    }
+
+    std::veector<std::pair<int, int>> get_path(int u, int v) {
+        std::vector<std::pair<int, int>> v1, v2;
+        while(top[u] != top[v]) {
+            if(dep[top[u]] > dep[top[v]]) {
+                v1.push_back({dfn[u], dfn[top[u]]});
+                u = parent[top[u]];
+            } else {
+                v2.push_back({dfn[top[v], dfn[v]]});
+                v = parent[top[v]];
+            }
+        }
+        v1.reserve(v1.size() + v2.size() + 1);
+        v1.push_back({dfn[u], dfn[v]});
+        reverse(v2.begin(), v2.end());
+        for(auto v : v2) {
+            v1.push_back(v);
+        }
+        return v1;
+    }
+};
+\end{lstlisting}
+
+\subsection{Splay}
+\begin{lstlisting}
+class Splay {
+public:
+    Splay() {}
+
+    Splay(int n) {
+        init(n);
+    }
+
+    void init(int n) {
+        cnt = head = 0;
+        Tree.assign(n + 5, {});
+    }
+
+    // add a num to the Tree
+    void add(int num) {
+        add(head, num);
+    }
+
+    // find the rank`s node in the Tree`s inorder
+    int find(int rank) {
+        return find(head, rank);
+    }
+
+    // query the num`s rank in the Tree
+    int rank(int num) {
+        return rank(head, num);
+    }
+
+    // return x-th`s value after sorting
+    int index(int x) {
+        int i = find(x);
+        splay(i, 0);
+        return Tree[i].key;
+    }
+
+    // return the pre num`s value
+    int pre(int num) {
+        return pre(head, num);
+    }
+
+    // return the post num`s value
+    int post(int num) {
+        return post(head, num);
+    }
+
+    // remove a num from the Tree
+    void remove(int num) {
+        int kth = rank(num);
+        if(kth != rank(num + 1)) {
+            int i = find(kth);
+            splay(i, 0);
+            if(Tree[i].ls == 0) {
+                head = Tree[i].rs;
+            } else if(Tree[i].rs == 0) {
+                head = Tree[i].ls;
+            } else {
+                int j = find(kth + 1);
+                splay(j, i);
+                Tree[j].ls = Tree[i].ls;
+                Tree[Tree[j].ls].father = j;
+                up(j);
+                head = j;
+            }
+            Tree[head].father = 0;
+        }
+    }
+
+private:
+
+    // Summary all the info about node[i]`s son
+    void up(int i) {
+        Tree[i].size = Tree[Tree[i].ls].size + Tree[Tree[i].rs].size + 1;
+    }
+
+    // check i is the right child of its father
+    int lr(int i) {
+        return Tree[Tree[i].father].rs == i ? 1 : 0;
+    }
+
+    void rotate(int i) {
+        int f = Tree[i].father, g = Tree[f].father;
+        int soni = lr(i), sonf = lr(f);
+        if(soni == 1) {
+            Tree[f].rs = Tree[i].ls;
+            if(Tree[f].rs != 0) {
+                Tree[Tree[f].rs].father = f;
+            }
+            Tree[i].ls = f;
+        } else {
+            Tree[f].ls = Tree[i].rs;
+            if(Tree[f].ls != 0) {
+                Tree[Tree[f].ls].father = f;
+            }
+            Tree[i].rs = f;
+        }
+        if(g != 0) {
+            if(sonf == 0) {
+                Tree[g].ls = i;
+            } else {
+                Tree[g].rs = i;
+            }
+        }
+        Tree[i].father = g;
+        Tree[f].father = i;
+        up(f);
+        up(i);
+    }
+
+    // make node[i] is a child of node[goal]
+    void splay(int i, int goal) {
+        int f = Tree[i].father, g = Tree[f].father;
+        while(f != goal) {
+            if(g != goal) {
+                if(lr(i) == lr(f)) {
+                    rotate(f);
+                } else {
+                    rotate(i);
+                }
+            }
+            rotate(i);
+            f = Tree[i].father;
+            g = Tree[f].father;
+        }
+        if(goal == 0) {
+            head = i;
+        }
+    }
+
+    void add(int i, int num) {
+        Tree[++cnt].key = num;
+        Tree[cnt].size = 1;
+        if(head == 0) {
+            head = cnt;
+        } else {
+            int f = 0, son = 0;
+            while(i != 0) {
+                f = i;
+                if(Tree[i].key <= num) {
+                    son = 1;
+                    i = Tree[i].rs;
+                } else {
+                    son = 0;
+                    i = Tree[i].ls;
+                }
+            }
+            if(son == 0) {
+                Tree[f].ls = cnt;
+            } else {
+                Tree[f].rs = cnt;
+            }
+            Tree[cnt].father = f;
+            splay(cnt, 0);
+        }
+    }
+
+    int find(int i, int rank) {
+        while(i != 0) {
+            if(Tree[Tree[i].ls].size + 1 == rank) {
+                return i;
+            } else if(Tree[Tree[i].ls].size >= rank) {
+                i = Tree[i].ls;
+            } else {
+                rank -= Tree[Tree[i].ls].size + 1;
+                i = Tree[i].rs;
+            }
+        }
+        return 0;
+    }
+
+    int rank(int i, int num) {
+        int ans = 0, f = 0;
+        while(i != 0) {
+            f = i;
+            if(Tree[i].key >= num) {
+                i = Tree[i].ls;
+            } else {
+                ans += Tree[Tree[i].ls].size + 1;
+                i = Tree[i].rs;
+            }
+        }
+        splay(f, 0);
+        return ans + 1;
+    }
+
+    int pre(int i, int num) {
+        int last = head;
+        int ans = std::numeric_limits<int>::min();
+        while(i != 0) {
+            last = i;
+            if(Tree[i].key < num) {
+                ans = std::max(ans, Tree[i].key);
+                i = Tree[i].rs;
+            } else {
+                i = Tree[i].ls;
+            }
+        }
+        splay(last, 0);
+        return ans;
+    }
+
+    int post(int i, int num) {
+        int last = head;
+        int ans = std::numeric_limits<int>::max();
+        while(i != 0) {
+            last = i;
+            if(Tree[i].key > num) {
+                ans = std::min(ans, Tree[i].key);
+                i = Tree[i].ls;
+            } else {
+                i = Tree[i].rs;
+            }
+        }
+        splay(last, 0);
+        return ans;
+    }
+
+    struct Node {
+        int ls, rs, size, father, key;
+    };
+
+    int cnt, head;
+    std::vector<Node> Tree;
+};
+\end{lstlisting}

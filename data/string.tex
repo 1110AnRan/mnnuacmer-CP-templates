@@ -1,0 +1,486 @@
+\section{字符串专题模板}
+\subsection{StringHash}
+\begin{lstlisting}
+template<const long long N>
+struct StringHash {
+    using i64 = long long;
+    using PII = std::pair<i64, i64>;
+    const i64 mod1 = 1e9 + 97, mod2 = 998244853, p1 = 131, p2 = 233;
+    std::array<i64, N> a1, a2;
+    std::array<i64, N> Phs1, Phs2;
+    std::array<i64, N> Shs1, Shs2;
+    StringHash() {
+        init(N - 1);
+    }
+    StringHash(const std::string& S) {
+        init(N - 1);
+        work(S);
+    }
+    void work(const std::string& s) {  
+        i64 n = s.size();
+        assert(n + 1 <= N);
+        for (int i = 0; i < n; ++i) {
+            i64 t = n - i - 1;
+            Phs1[i + 1] = ((i64)Phs1[i] * p1 + s[i]) % mod1;
+            Phs2[i + 1] = ((i64)Phs2[i] * p2 + s[i]) % mod2;
+            Shs1[t + 1] = ((i64)Shs1[t + 2] * p1 + s[t]) % mod1;
+            Shs2[t + 1] = ((i64)Shs2[t + 2] * p2 + s[t]) % mod2;
+        }
+    }
+    PII PreHash(i64 l, i64 r) {
+        assert(l <= r);
+        i64 P1 = (Phs1[r] - (i64)Phs1[l - 1] * a1[r - l + 1] % mod1 + mod1) % mod1;
+        i64 P2 = (Phs2[r] - (i64)Phs2[l - 1] * a2[r - l + 1] % mod2 + mod2) % mod2;
+        return PII(P1, P2);
+    };
+    PII SufHash(i64 l, i64 r) {
+        assert(l <= r);
+        i64 S1 = (Shs1[l] - (i64)Shs1[r + 1] * a1[r - l + 1] % mod1 + mod1) % mod1;
+        i64 S2 = (Shs2[l] - (i64)Shs2[r + 1] * a2[r - l + 1] % mod2 + mod2) % mod2;
+        return PII(S1, S2);
+    }
+    bool isPlalindrome(i64 l, i64 r) {
+        auto [P1, P2] = PreHash(l, r);
+        auto [S1, S2] = SufHash(l, r);
+        return P1 == S1 && P2 == S2;
+    }
+    void init(i64 n) {
+        a1[0] = a2[0] = 1;
+        for (int i = 0; i < n; ++i) {
+            a1[i + 1] = (i64)a1[i] * p1 % mod1;
+            a2[i + 1] = (i64)a2[i] * p2 % mod2;
+        }
+    }
+};
+static const int N = 1e5 + 5;
+StringHash<N> h;
+\end{lstlisting}
+
+\subsection{AC自动机}
+\begin{lstlisting}
+template<u64 MAXN, u64 MAXS>
+struct AhoCorasick {
+    static constexpr int ALPHABEL = 26;
+
+    int cnt;
+    std::vector<int> end;
+    std::vector<std::array<int, ALPHABEL>> tree;
+    std::vector<int> fail;
+    std::vector<bool> alert;
+    std::vector<int> times;
+    
+
+    AhoCorasick() {
+        end.assign(MAXN + 5, -1);
+        tree.assign(MAXS + 5, {});
+        fail.assign(MAXS + 5, 0);
+        alert.assign(MAXS + 5, false);
+        times.assign(MAXS + 5, 0);
+        cnt = 0;
+    }
+
+    void add(int i, const std::string &s) {
+        int u = 0;
+        for(int j = 0, c; j < s.size(); j++) {
+            c = s[j] - 'a';
+            if(tree[u][c] == 0) {
+                tree[u][c] = ++cnt;
+            }
+            u = tree[u][c];
+        }
+        end[i] = u;
+        alert[u] = true;
+    }
+
+    void setfail() {
+        std::queue<int> q;
+        for(int i = 0; i < ALPHABEL; i++) {
+            if(tree[0][i] > 0) {
+                q.push(tree[0][i]);
+            }
+        }
+        while(q.size()) {
+            int u = q.front();
+            q.pop();
+
+            for(int i = 0; i < ALPHABEL; i++) {
+                if(tree[u][i] == 0) {
+                    tree[u][i] = tree[fail[u]][i];
+                } else {
+                    fail[tree[u][i]] = tree[fail[u]][i];
+                    q.push(tree[u][i]);
+                }
+            }
+
+            if(alert[fail[u]]) {
+                alert[u] = true;
+            }
+        }
+    }
+
+    template<bool Counter = true>
+    void work() {
+        setfail();
+        if constexpr (Counter) {
+            std::string s;
+            std::cin >> s;
+
+            for(int i = 0, u = 0; i < s.size(); i++) {
+                u = tree[u][s[i] - 'a'];
+                times[u]++;
+            }
+
+            std::vector<std::vector<int>> g(MAXS + 5);
+
+            auto add_Edge = [&](int u, int v) -> void {
+                g[u].push_back(v);
+            };
+
+            auto dfs = [&] (auto &&self, int u) -> void {
+                for(auto v : g[u]) {
+                    self(self, v);
+                    times[u] += times[v];
+                }
+            };
+
+            for(int i = 1; i <= cnt; i++) {
+
+                add_Edge(fail[i], i);
+            }
+
+            dfs(dfs, 0);
+        }
+    }
+
+    int get_index_i_times(int i) {
+        return times[end[i]];
+    }
+
+};
+\end{lstlisting}
+
+\subsection{马拉车}
+\begin{lstlisting}
+// the real length in s from p is p[i] - 1
+std::vector<int> manacher(std::string s) {
+    std::string t = "#";
+    for (auto c : s) {
+        t += c;
+        t += '#';
+    }
+    int n = t.size();
+    std::vector<int> p(n);
+    for(int i = 0, r = 0, c = 0, len; i < n; i++) {
+        len = r > i ? std::min(p[2 * c - i], r - i) : 1;
+        while(i + len < n && i - len >= 0 && t[i + len] == t[i - len]) {
+            len++;
+        }
+        if(i + len > r) {
+            r = i + len;
+            c = i;
+        }
+        p[i] = len;
+    }
+    return p;
+}
+\end{lstlisting}
+
+\subsection{Z函数}
+\begin{lstlisting}
+std::vector<int> zFunction(std::string s) {
+    int n = s.size();
+    std::vector<int> z(n + 1);
+    z[0] = n;
+    for(int i = 1, c = 1, r = 1, len; i < n; i++) {
+        len = r > i ? std::min(r - i, z[i - c]) : 0;
+        while(i + len < n and s[i + len] == len) {
+            len++;
+        }
+        if(i + len > r) {
+            r = i + len;
+            c = i;
+        }
+        z[i] = len;
+    }
+    return z;
+}
+\end{lstlisting}
+
+\subsection{后缀数组}
+\begin{lstlisting}
+struct SuffixArray {
+    int n;
+    std::vector<int> sa, rk, lc;
+    SuffixArray(const std::string &s) {
+        n = s.length();
+        sa.resize(n);
+        lc.resize(n - 1);
+        rk.resize(n);
+        std::iota(sa.begin(), sa.end(), 0);
+        std::sort(sa.begin(), sa.end(), [&](int a, int b) {return s[a] < s[b];});
+        rk[sa[0]] = 0;
+        for (int i = 1; i < n; ++i)
+            rk[sa[i]] = rk[sa[i - 1]] + (s[sa[i]] != s[sa[i - 1]]);
+        int k = 1;
+        std::vector<int> tmp, cnt(n);
+        tmp.reserve(n);
+        while (rk[sa[n - 1]] < n - 1) {
+            tmp.clear();
+            for (int i = 0; i < k; ++i)
+                tmp.push_back(n - k + i);
+            for (auto i : sa)
+                if (i >= k)
+                    tmp.push_back(i - k);
+            std::fill(cnt.begin(), cnt.end(), 0);
+            for (int i = 0; i < n; ++i)
+                ++cnt[rk[i]];
+            for (int i = 1; i < n; ++i)
+                cnt[i] += cnt[i - 1];
+            for (int i = n - 1; i >= 0; --i)
+                sa[--cnt[rk[tmp[i]]]] = tmp[i];
+            std::swap(rk, tmp);
+            rk[sa[0]] = 0;
+            for (int i = 1; i < n; ++i)
+                rk[sa[i]] = rk[sa[i - 1]] + (tmp[sa[i - 1]] < tmp[sa[i]] || sa[i - 1] + k == n || tmp[sa[i - 1] + k] < tmp[sa[i] + k]);
+            k *= 2;
+        }
+        for (int i = 0, j = 0; i < n; ++i) {
+            if (rk[i] == 0) {
+                j = 0;
+            } else {
+                for (j -= j > 0; i + j < n && sa[rk[i] - 1] + j < n && s[i + j] == s[sa[rk[i] - 1] + j]; )
+                    ++j;
+                lc[rk[i] - 1] = j;
+            }
+        }
+    }
+};
+\end{lstlisting}
+\subsubsection{使用方法示例}
+\begin{lstlisting}
+// deepseek
+#include <iostream>
+#include <string>
+#include <vector>
+
+struct SAM {
+    // ...（用户提供的模板代码）
+};
+
+int main() {
+    SAM sam;
+    int last = 1;  // 初始状态
+    std::string s = "abba";
+    for (char c : s) {
+        last = sam.extend(last, c, 'a');
+    }
+
+    // 统计不同子串数量
+    int count = 0;
+    for (int i = 2; i < sam.size(); ++i) {
+        count += sam.len(i) - sam.len(sam.link(i));
+    }
+    std::cout << "不同子串数量: " << count << std::endl;  // 输出 10
+
+    // 检查子串是否存在
+    auto is_substring = [&](const std::string& t) {
+        int p = 1;
+        for (char c : t) {
+            p = sam.next(p, c, 'a');
+            if (p == 0) return false;
+        }
+        return true;
+    };
+    std::cout << "子串 'ab' 是否存在: " << is_substring("ab") << std::endl;  // 输出 1
+
+    // 查找最长重复子串
+    int max_len = 0;
+    for (int i = 2; i < sam.size(); ++i) {
+        max_len = std::max(max_len, sam.len(i));
+    }
+    std::cout << "最长重复子串长度: " << max_len << std::endl;  // 输出 4
+
+    return 0;
+}
+\end{lstlisting}
+
+\subsection{回文自动机}
+\begin{lstlisting}
+struct PAM {
+    static constexpr int ALPHABET_SIZE = 28;
+    struct Node {
+        int len;
+        int link;
+        int cnt;
+        std::array<int, ALPHABET_SIZE> next;
+        Node() : len{}, link{}, cnt{}, next{} {}
+    };
+    std::vector<Node> t;
+    int suff;
+    std::string s;
+    PAM() {
+        init();
+    }
+    void init() {
+        t.assign(2, Node());
+        t[0].len = -1;
+        suff = 1;
+        s.clear();
+    }
+    int newNode() {
+        t.emplace_back();
+        return t.size() - 1;
+    }
+     
+    bool add(char c, char offset = 'a') {
+        int pos = s.size();
+        s += c;
+        int let = c - offset;
+        int cur = suff, curlen = 0;
+ 
+        while (true) {
+            curlen = t[cur].len;
+            if (pos - 1 - curlen >= 0 && s[pos - 1 - curlen] == s[pos])
+                break;
+            cur = t[cur].link;
+        }
+        if (t[cur].next[let]) {  
+            suff = t[cur].next[let];
+            return false;
+        }
+        int num = newNode();
+        suff = num;
+        t[num].len = t[cur].len + 2;
+        t[cur].next[let] = num;
+ 
+        if (t[num].len == 1) {
+            t[num].link = 1;
+            t[num].cnt = 1;
+            return true;
+        }
+ 
+        while (true) {
+            cur = t[cur].link;
+            curlen = t[cur].len;
+            if (pos - 1 - curlen >= 0 && s[pos - 1 - curlen] == s[pos]) {
+                t[num].link = t[cur].next[let];
+                break;
+            }
+        }
+        t[num].cnt = 1 + t[t[num].link].cnt;
+        return true;
+    }
+};
+PAM pam;
+\end{lstlisting}
+
+\subsection{KMP}
+\begin{lstlisting}
+template <typename T>
+struct KMP {
+    using value_type = typename T::value_type;
+    using size_type = uint32_t;
+    T m_seq;
+    std::vector<size_type> m_pi;
+    void init() {
+        m_seq.push_back({});
+        m_pi.push_back(0);
+    }
+    KMP() {
+        clear();
+    }
+    template <typename InitMapping>
+    KMP(size_type length, InitMapping mapping) {
+        resize(length, mapping); 
+    }
+    template <typename Iterator>
+    KMP(Iterator first, Iterator last) {
+        reset(first, last); 
+    }
+    KMP(const T &seq) : KMP(seq.begin(), seq.end()) {}
+    template <typename InitMapping>
+    void resize(size_type length, InitMapping mapping) {
+        reserve(length);
+        for (size_type i = 0; i != length; i++) {
+            push_back(mapping(i));
+        }
+    }
+    template <typename Iterator>
+    void reset(Iterator first, Iterator last) {
+        resize(last - first, [&](size_type i) { return *(first + i); });
+    }
+    void reserve(size_type length) {
+        clear();
+        m_seq.reserve(length);
+        m_pi.reserve(length); 
+    }
+    void clear() {
+        m_seq.clear();
+        m_pi.clear();
+        init();
+    }
+    void push_back(const value_type &elem) {
+        m_seq.push_back(elem);
+        if (size() > 1) {
+            size_type pi = jump(m_pi.back(), elem);
+            m_pi.push_back(pi + (m_seq[pi + 1] == elem));
+        } else
+            m_pi.push_back(0);
+    }
+    void pop_back() {
+        m_seq.pop_back();
+        m_pi.pop_back();
+    }
+    size_type size() const { return m_seq.size() - 1; }
+    size_type jump(size_type last_pi, const value_type &elem) const {
+        size_type len = last_pi;
+        while (len && (len == size() || m_seq[len + 1] != elem)) { 
+            len = m_pi[len];
+        }
+        return len;
+    }
+    // Check if it is included in a certain sequence
+    // if not exist, return -1
+    template <typename Iterator>
+    size_type contained_by(Iterator first, Iterator last) const {
+        if (!size()) return 0;
+        size_type len = 0;
+        for (auto it = first; it != last; ++it) {
+            const value_type &elem = *it;
+            while (len && m_seq[len + 1] != elem) {
+                len = m_pi[len];
+            }
+            if (m_seq[len + 1] == elem) { 
+                len++;
+            }
+            if (len == size()) {
+                return (it - first) - len + 1;
+            }
+        }
+        return -1;
+    }
+    // Call callback for all borders at a certain location
+    /*
+    kmp.do_for_each_border(j, [&](int pi) {
+                if (pi != j) cout << "/";
+                cout << p.substr(0, pi);
+            });
+    */
+    template <typename Callback>
+    void do_for_each_border(size_type init_border, Callback &&call) {
+        size_type pi = init_border;
+        while (pi) {
+            call(pi);
+            pi = query_Pi(pi - 1);
+        }
+    }
+    // If there is a prefix string and a suffix string that are the same
+    // then return greater than 0 O(1)
+    size_type query_Pi(size_type i) const { 
+        return m_pi[i + 1];
+    }
+};
+using KMP_string = KMP<std::string>;
+template <typename ValueType>
+using KMP_vector = KMP<std::vector<ValueType>>;
+\end{lstlisting}

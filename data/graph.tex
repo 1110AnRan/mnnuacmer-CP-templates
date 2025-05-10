@@ -1,0 +1,969 @@
+\section{图论专题模板}
+\subsection{链式前向星建图}
+\begin{lstlisting}
+const int N = 2e6 + 10;
+struct Enode {
+    int next, to, w;
+}edges[N];
+int head[N], cnt = 0;
+
+void init() {
+    fill(head, head + N, -1);
+    cnt = 0;
+}
+
+void addEdge(int u, int v, int w = 1) {
+    edges[cnt].to = v;
+    edges[cnt].w = w;
+    edges[cnt].next = head[u];
+    head[u] = cnt++;
+}
+\end{lstlisting}
+
+\subsection{Dijkstra}
+\begin{lstlisting}
+struct Dijkstra {   // index-base-0
+    using i64 = long long;
+    int n;
+    std::vector<std::vector<std::pair<int, i64>>> adj;
+    std::vector<i64> dis;
+    std::vector<bool> vis;
+    Dijkstra(int n) {
+        init(n);
+    }
+
+    void init(int n) {
+        this->n = n;
+        adj.assign(n, {});
+        vis.assign(n, false);
+        dis.assign(n, 1e18);
+    }
+ 
+    void add_edge(int u, int v, i64 d) {
+        adj[u].push_back({v, d});
+        adj[v].push_back({u, d});
+    }
+ 
+
+    struct node {
+        i64 dis;
+        int pos;
+        bool operator <(const node &x) const {
+            return x.dis < dis;
+        }
+    };
+ 
+    std::priority_queue<node> q;
+    void work(int r) {
+        dis[r] = 0;
+        q.push((node){0, r});
+ 
+        while(!q.empty()) {
+            node tmp = q.top();
+            q.pop();
+            int u = tmp.pos;
+            i64 d = tmp.dis;
+ 
+            if (vis[u]) {
+                continue;
+            }
+ 
+            vis[u] = true;
+            for(auto [v, w] : adj[u]) {
+                if(dis[v] > dis[u] + w) {
+                    dis[v] = dis[u] + w;
+                    if(!vis[v]) {
+                        q.push((node){dis[v], v});
+                    }
+                }
+            }
+        }
+    }
+};
+\end{lstlisting}
+
+\subsection{Spfa}
+\begin{lstlisting}
+template<class T = long long>
+struct Spfa {   // index-base-0
+	static constexpr T inf = std::numeric_limits<T>::max() / 2;
+
+	int n;
+	std::vector<std::vector<std::pair<int, T>>> g;
+	std::vector<T> dis;
+
+	Spfa() {};
+
+	Spfa(int n) : n(n), g(n) {}
+
+	void add_Edge(int u, int v, T w) {
+        g[u].emplace_back({v, w});
+	}
+
+	bool work(int root = 0) {
+		std::vector<bool> vis(n, false);
+		std::vector<int> cnt(n, 0);
+        dis.assign(n, inf);
+		dis[root] = 0;
+        // dis.assign(n, -inf); 最长路
+		std::queue<int> q;
+		q.push(root);
+		vis[root] = true;
+		while(q.size()) {
+			auto u = q.front();
+			q.pop();
+			vis[u] = false;
+			for(auto [v, w] : g[u]) {
+                if(dis[v] > dis[u] + w) { // 最长路 -> v < u + w
+                    dis[v] = dis[u] + w;
+                    if((cnt[v] = cnt[u] + 1) >= n) {
+                        return false;
+                    }
+                    if(!vis[v]) {
+                        q.push(v);
+                        vis[v] = true;
+                    }
+                }
+			}
+		}
+		return true;
+	}
+};
+\end{lstlisting}
+
+\subsection{Floyd}
+\begin{lstlisting}
+const int inf = 1e9;
+void floyd(std::vector<std::vector<int>>& dis) {
+    int n = dis.size();
+    for(int k=0; k<n; ++k)
+        for(int i=0; i<n; ++i)
+            for(int j=0; j<n; ++j) {
+                if(i!=j && i!=k && j!=k 
+                && dis[i][k] < inf && dis[k][j] < inf// 边权有负数必加
+                && dis[i][j] > dis[i][k] + dis[k][j])
+                    dis[i][j] = dis[i][k]+dis[k][j];
+            }
+}
+// 同时记录方案数
+void floyd(std::vector<std::vector<int>>& dis, std::vector<std::vector<Z>>& f) {
+    int n = dis.size();
+    for(int k=0; k<n; ++k)
+        for(int i=0; i<n; ++i)
+            for(int j=0; j<n; ++j)
+                if(i!=j && i!=k && j!=k) {
+                    if(dis[i][j] > dis[i][k] + dis[k][j]) {
+                        dis[i][j] = dis[i][k] + dis[k][j];
+                        f[i][i] = f[i][k] * f[k][j];
+                    }else if(dis[i][j] == dis[i][k] + dis[k][j]) {
+                        f[i][j] += f[i][k] * f[k][j];
+                    }
+                }
+}
+\end{lstlisting}
+
+\subsection{Kruskal}
+\begin{lstlisting}
+template<class T>
+struct KruskalMst {		// index-base-0
+    int n;
+    std::vector<int> f;
+    std::vector<std::tuple<T, int, int>> e;
+    KruskalMst(int n) {
+		this->n = n;
+		f.resize(n);
+		std::iota(f.begin(), f.end(), 0);
+	}
+    void addEdge(int u, int v, T w) {
+        e.emplace_back(w, u, v);
+    }
+    int find(int u) {
+        return f[u] == u ? u : f[u] = find(f[u]);
+    }
+    T work() {
+        std::sort(e.begin(),e.end());
+        T ans = 0;
+        int cnt = 0;
+		for(auto [w, u, v] : e) {
+			u = find(u);
+			v = find(v);
+			if(u == v) {
+				continue;
+			}
+			f[u] = v;
+			ans += w;
+			if(++cnt == n - 1) {
+				break;
+			}
+		}
+        // assert(cnt==n-1);
+        return ans;
+    }
+};
+\end{lstlisting}
+
+\subsection{二分图最大匹配}
+\subsubsection{匈牙利算法}
+\begin{lstlisting}
+struct BipartiteGraph {		// index-base-0
+    int n, m;
+    std::vector<std::vector<int>> g;
+    std::vector<int> vis, link;
+    BipartiteGraph(int n,int m)
+	:n(n),m(m),g(n),vis(m),link(m) {}
+
+    void addEdge(int u, int v) {// left->right
+        g[u].push_back(v);
+    }
+    bool find(int u) {// 左边u -> 右边v
+        for(int v: g[u]) {
+            if(vis[v]) {
+				continue;
+			}
+            vis[v] = 1;
+            if(link[v] == -1 || find(link[v])) {
+                link[v] = u;
+                return true;
+            }
+        }
+        return false;
+    }
+    int maxMatching() {
+        int cnt = 0;
+        std::fill_n(link.begin(), m, -1);
+        for(int i = 0; i < n; ++i) {
+            if(!find(i)) {
+				continue;
+			}
+            std::fill_n(vis.begin(), m, 0);
+            ++cnt;
+        }
+        return cnt;
+    }
+};
+\end{lstlisting}
+
+\subsubsection{HK算法}
+\begin{lstlisting}
+struct HopcroftKarp {		// index-base-0
+    static constexpr int INF = 0x3f3f3f3f;
+    int n, m, dis;
+    std::vector<std::vector<int>> e;
+    std::vector<int> matchX, matchY, dx, dy;
+    std::vector<bool> used;
+    HopcroftKarp(int n, int m)
+    :n(n), m(m), e(n), matchX(n), matchY(m), dx(n), dy(m), used(m) {}
+    void addEdge(int u, int v) {
+        e[u].push_back(v);
+    }
+    bool searchP() {
+        std::fill(dx.begin(), dx.end(), -1);
+        std::fill(dy.begin(), dy.end(), -1);
+        dis = INF;
+        std::queue<int> q;
+        for(int i = 0; i < n; ++i) {
+            if(matchX[i] == -1) {
+                q.push(i), dx[i] = 0;
+            }
+        }
+        while(!q.empty()) {
+            int u = q.front(); 
+            q.pop();
+            if(dx[u] > dis) {
+				break;
+			}
+            for(int v : e[u])
+                if(dy[v] == -1) {
+                    dy[v] = dx[u] + 1;
+                    if(matchY[v] == -1) {
+						dis = dy[v];
+					}
+                    else {
+						dx[matchY[v]] = dy[v] + 1;
+						q.push(matchY[v]);
+					}
+                }
+        }
+        return dis != INF;
+    }
+    bool dfs(int u) {
+        for(int v : e[u]) {
+            if(used[v] || dy[v] != dx[u] + 1) {
+				continue;
+			}
+            used[v] = true;
+            if(matchY[v] != -1 && dy[v] == dis) {
+				continue;
+			}
+            if(matchY[v] == -1 || dfs(matchY[v])) {
+                matchY[v] = u;
+                matchX[u] = v;
+                return true;
+            }
+        }
+        return false;
+    }
+    int maxMatching() {
+        int res = 0;
+        std::fill(matchX.begin(), matchX.end(), -1);
+        std::fill(matchY.begin(), matchY.end(), -1);
+        while(searchP()) {
+            std::fill(used.begin(), used.end(), false);
+            for(int i = 0; i < n; ++i) {
+				if(matchX[i] == -1 && dfs(i)) {
+					++res;
+				}
+			}
+        }
+        return res;
+    }
+};
+\end{lstlisting}
+
+\subsection{二分图判定}
+\begin{lstlisting}
+struct JudgeBG {	// index-base-0
+    int n;
+    std::vector<int> bel;	// bel:1 or 2
+    std::vector<std::vector<int>> g;
+    JudgeBG(int n): n(n),g(n),bel(n) {}
+    void addEdge(int u, int v) {
+        g[u].push_back(v);
+        g[v].push_back(u);
+    }
+    bool dfs(int u, int color = 1) {
+        if(bel[u]) {
+			return bel[u]==color;
+		}
+        bel[u] = color;
+        for(int v : g[u])
+            if(!dfs(v, 3-color)) {
+				return false;
+			} 
+        return true;
+    }
+    bool paint() {// 二分图染色
+        for(int i = 0; i < n; ++i) {
+            if(bel[i]) {
+				continue;
+			}
+            if(!dfs(i)) {
+				return false;
+			}
+        }
+        return true;
+    }
+    // std::vector<int> to;//[0,ln), [0,rn)
+    // //  use it to divide the graph if paint()=true
+    // BipartiteGraph reLabel() {// left->right
+    //     int ln = 0,rn = 0;
+    //     to.resize(n);
+    //     for(int i = 0; i < n; ++i) {
+    //         if(bel[i] == 1) {
+	// 			to[i] = ln++;
+	// 		}
+    //         else {
+	// 			to[i] = rn++;
+	// 		}
+    //     }
+    //     BipartiteGraph bg(ln, rn);
+    //     for(int i = 0; i < n; ++i) {
+    //         for(int j : g[i]) {
+    //             if(bel[i] == 1) {
+	// 				bg.addEdge(to[i], to[j]); 
+	// 			}
+	// 		}
+	// 	}
+    //     return bg;
+    // }
+};
+\end{lstlisting}
+
+\subsection{Kruskal重构树}
+\begin{lstlisting}
+namespace krt {     // index-1
+    constexpr int MAXN = 2e5 + 10, MAXH = 21;
+    constexpr bool ASC = true;  // 边权从小到大排序
+    int father[MAXN], head[MAXN], next[MAXN], to[MAXN];
+    int nodekey[MAXN], dep[MAXN], stjump[MAXN][MAXH];
+    int /*dfn[MAXN], */seg[MAXN], in[MAXN], out[MAXN];
+    int cntu, cntg, cntd;
+    int find(int x) {
+        return x == father[x] ? x : father[x] = find(father[x]);
+    }
+
+    void addEdge(int u, int v) {
+        next[++cntg] = head[u];
+		to[cntg] = v;
+		head[u] = cntg;
+    }
+
+    int lca(int x, int y) {
+        if(dep[x] < dep[y]) {
+            std::swap(x, y);
+        }
+        for(int p = MAXH - 1; p >= 0; p--) {
+            if(dep[stjump[x][p]] >= dep[y]) {
+                x = stjump[x][p];
+            }
+        }
+        if(x == y) {
+            return x;
+        }
+        for(int p = MAXH - 1; p >= 0; p--) {
+            if(stjump[x][p] != stjump[y][p]) {
+                x = stjump[x][p];
+                y = stjump[y][p];
+            }
+        }
+        return stjump[x][0];
+    }
+
+    void build(int n, std::vector<std::tuple<int, int, int>> e) {
+        for(int i = 1; i <= n; i++) {
+            father[i] = i;
+        }
+        if constexpr (ASC) {
+            std::sort(e.begin(), e.end());
+        } else {
+            std::sort(e.begin(), e.end(), std::greater());
+        }
+        cntu = n;
+        for(auto& [w, u, v] : e) {
+            int fx = find(u);
+            int fy = find(v);
+            if(fx != fy) {
+                father[fx] = father[fy] = ++cntu;
+                father[cntu] = cntu;
+                nodekey[cntu] = w;
+                addEdge(cntu, fx);
+                addEdge(cntu, fy);
+            }
+        }
+        std::function<void(int, int)> dfs1 = [&](int u, int fa) -> void {
+            dep[u] = dep[fa] + 1;
+            in[u] = ++cntd;
+            // dfn[u] = ++cntd;
+            seg[cntd] = u;
+            stjump[u][0] = fa;
+            for(int i = 1; i < MAXH; i++) {
+                stjump[u][i] = stjump[stjump[u][i - 1]][i - 1];
+            }
+            for(int e = head[u]; e > 0; e = next[e]) {
+                dfs1(to[e], u);
+            }
+            out[u] = cntd;
+        };
+        for(int i = 1; i <= cntu; i++) {
+            if(i == father[i]) {
+                dfs1(i, 0);
+            }
+        }
+    }
+    // 在lim的限制下最高能跳到哪一个节点
+    int jumpUp(int u, int lim) {
+        for(int i = MAXH - 1; i >= 0; --i) {
+            if constexpr (ASC) {
+                if(stjump[i][u] and nodekey[stjump[i][u]]<=lim) { 
+                    u = stjump[i][u];
+                }
+            } else {
+                if(stjump[i][u] and nodekey[stjump[i][u]]>=lim) {
+                    u = stjump[i][u];
+                }
+            }
+        }
+        return u;
+    }
+}
+\end{lstlisting}
+
+\subsection{SCC点-双连通分量}
+\begin{lstlisting}
+// index-base-0
+struct SCC {
+    int n;
+    std::vector<std::vector<int>> adj;
+    std::vector<int> stk;
+    std::vector<int> dfn, low, bel;
+    int cur, cnt;
+    
+    SCC() {}
+    SCC(int n) {
+        init(n);
+    }
+    
+    void init(int n) {
+        this->n = n;
+        adj.assign(n, {});
+        dfn.assign(n, -1);
+        low.resize(n);
+        bel.assign(n, -1);
+        stk.clear();
+        cur = cnt = 0;
+    }
+    
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+    }
+    
+    void dfs(int x) {
+        dfn[x] = low[x] = cur++;
+        stk.push_back(x);
+        
+        for (auto y : adj[x]) {
+            if (dfn[y] == -1) {
+                dfs(y);
+                low[x] = std::min(low[x], low[y]);
+            } else if (bel[y] == -1) {
+                low[x] = std::min(low[x], dfn[y]);
+            }
+        }
+        
+        if (dfn[x] == low[x]) {
+            int y;
+            do {
+                y = stk.back();
+                bel[y] = cnt;
+                stk.pop_back();
+            } while (y != x);
+            cnt++;
+        }
+    }
+    
+    std::vector<int> work() {
+        for (int i = 0; i < n; i++) {
+            if (dfn[i] == -1) {
+                dfs(i);
+            }
+        }
+        return bel;
+    }
+};
+\end{lstlisting}
+
+\subsection{EBCC边-双连通分量}
+\begin{lstlisting}
+std::set<std::pair<int, int>> E;
+ 
+struct EBCC {
+    int n;
+    std::vector<std::vector<int>> adj;
+    std::vector<int> stk;
+    std::vector<int> dfn, low, bel;
+    int cur, cnt;
+    
+    EBCC() {}
+    EBCC(int n) {
+        init(n);
+    }
+    
+    void init(int n) {
+        this->n = n;
+        adj.assign(n, {});
+        dfn.assign(n, -1);
+        low.resize(n);
+        bel.assign(n, -1);
+        stk.clear();
+        cur = cnt = 0;
+    }
+    
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    
+    void dfs(int x, int p) {
+        dfn[x] = low[x] = cur++;
+        stk.push_back(x);
+        
+        for (auto y : adj[x]) {
+            if (y == p) {
+                continue;
+            }
+            if (dfn[y] == -1) {
+                E.emplace(x, y);
+                dfs(y, x);
+                low[x] = std::min(low[x], low[y]);
+            } else if (bel[y] == -1 && dfn[y] < dfn[x]) {
+                E.emplace(x, y);
+                low[x] = std::min(low[x], dfn[y]);
+            }
+        }
+        
+        if (dfn[x] == low[x]) {
+            int y;
+            do {
+                y = stk.back();
+                bel[y] = cnt;
+                stk.pop_back();
+            } while (y != x);
+            cnt++;
+        }
+    }
+    
+    std::vector<int> work() {
+        dfs(0, -1);
+        return bel;
+    }
+    
+    struct Graph {
+        int n;
+        std::vector<std::pair<int, int>> edges;
+        std::vector<int> siz;
+        std::vector<int> cnte;
+    };
+    Graph compress() {
+        Graph g;
+        g.n = cnt;
+        g.siz.resize(cnt);
+        g.cnte.resize(cnt);
+        for (int i = 0; i < n; i++) {
+            g.siz[bel[i]]++;
+            for (auto j : adj[i]) {
+                if (bel[i] < bel[j]) {
+                    g.edges.emplace_back(bel[i], bel[j]);
+                } else if (i < j) {
+                    g.cnte[bel[i]]++;
+                }
+            }
+        }
+        return g;
+    }
+};
+\end{lstlisting}
+
+\subsection{MaxFlow}
+\begin{lstlisting}
+template<class T>
+struct MaxFlow {
+    struct _Edge {
+        int to;
+        T cap;
+        _Edge(int to, T cap) : to(to), cap(cap) {}
+    };
+    int n;
+    std::vector<_Edge> e;
+    std::vector<std::vector<int>> g;
+    std::vector<int> cur, h;
+    MaxFlow() {}
+    MaxFlow(int n) {
+        init(n);
+    }
+    void init(int n) {
+        this->n = n;
+        e.clear();
+        g.assign(n, {});
+        cur.resize(n);
+        h.resize(n);
+    }
+    bool bfs(int s, int t) {
+        h.assign(n, -1);
+        std::queue<int> que;
+        h[s] = 0;
+        que.push(s);
+        while (!que.empty()) {
+            const int u = que.front();
+            que.pop();
+            for (int i : g[u]) {
+                auto [v, c] = e[i];
+                if (c > 0 && h[v] == -1) {
+                    h[v] = h[u] + 1;
+                    if (v == t) {
+                        return true;
+                    }
+                    que.push(v);
+                }
+            }
+        }
+        return false;
+    }
+    T dfs(int u, int t, T f) {
+        if (u == t) {
+            return f;
+        }
+        auto r = f;
+        for (int &i = cur[u]; i < int(g[u].size()); ++i) {
+            const int j = g[u][i];
+            auto [v, c] = e[j];
+            if (c > 0 && h[v] == h[u] + 1) {
+                auto a = dfs(v, t, std::min(r, c));
+                e[j].cap -= a;
+                e[j ^ 1].cap += a;
+                r -= a;
+                if (r == 0) {
+                    return f;
+                }
+            }
+        }
+        return f - r;
+    }
+    void addEdge(int u, int v, T c) {
+        g[u].push_back(e.size());
+        e.emplace_back(v, c);
+        g[v].push_back(e.size());
+        e.emplace_back(u, 0);
+    }
+    T flow(int s, int t) {
+        T ans = 0;
+        while (bfs(s, t)) {
+            cur.assign(n, 0);
+            ans += dfs(s, t, std::numeric_limits<T>::max());
+        }
+        return ans;
+    }
+    std::vector<bool> minCut() {
+        std::vector<bool> c(n);
+        for (int i = 0; i < n; i++) {
+            c[i] = (h[i] != -1);
+        }
+        return c;
+    }
+
+    
+    struct Edge {
+        int from;
+        int to;
+        T cap;
+        T flow;
+    };
+    std::vector<Edge> edges() {
+        std::vector<Edge> a;
+        for (int i = 0; i < e.size(); i += 2) {
+            Edge x;
+            x.from = e[i + 1].to;
+            x.to = e[i].to;
+            x.cap = e[i].cap + e[i + 1].cap;
+            x.flow = e[i + 1].cap;
+            a.push_back(x);
+        }
+        return a;
+    }
+};
+\end{lstlisting}
+
+\subsection{Minflow}
+\begin{lstlisting}
+template<class T>
+struct MinCostFlow {
+    struct _Edge {
+        int to;
+        T cap;
+        T cost;
+        _Edge(int to_, T cap_, T cost_) : to(to_), cap(cap_), cost(cost_) {}
+    };
+    int n;
+    std::vector<_Edge> e;
+    std::vector<std::vector<int>> g;
+    std::vector<T> h, dis;
+    std::vector<int> pre;
+    bool dijkstra(int s, int t) {
+        dis.assign(n, std::numeric_limits<T>::max());
+        pre.assign(n, -1);
+        std::priority_queue<std::pair<T, int>, std::vector<std::pair<T, int>>, std::greater<std::pair<T, int>>> que;
+        dis[s] = 0;
+        que.emplace(0, s);
+        while (!que.empty()) {
+            T d = que.top().first;
+            int u = que.top().second;
+            que.pop();
+            if (dis[u] != d) {
+                continue;
+            }
+            for (int i : g[u]) {
+                int v = e[i].to;
+                T cap = e[i].cap;
+                T cost = e[i].cost;
+                if (cap > 0 && dis[v] > d + h[u] - h[v] + cost) {
+                    dis[v] = d + h[u] - h[v] + cost;
+                    pre[v] = i;
+                    que.emplace(dis[v], v);
+                }
+            }
+        }
+        return dis[t] != std::numeric_limits<T>::max();
+    }
+    MinCostFlow() {}
+    MinCostFlow(int n_) {
+        init(n_);
+    }
+    void init(int n_) {
+        n = n_;
+        e.clear();
+        g.assign(n, {});
+    }
+    void addEdge(int u, int v, T cap, T cost) {
+        g[u].push_back(e.size());
+        e.emplace_back(v, cap, cost);
+        g[v].push_back(e.size());
+        e.emplace_back(u, 0, -cost);
+    }
+    std::pair<T, T> flow(int s, int t) {
+        T flow = 0;
+        T cost = 0;
+        h.assign(n, 0);
+        while (dijkstra(s, t)) {
+            for (int i = 0; i < n; ++i) {
+                h[i] += dis[i];
+            }
+            T aug = std::numeric_limits<int>::max();
+            for (int i = t; i != s; i = e[pre[i] ^ 1].to) {
+                aug = std::min(aug, e[pre[i]].cap);
+            }
+            for (int i = t; i != s; i = e[pre[i] ^ 1].to) {
+                e[pre[i]].cap -= aug;
+                e[pre[i] ^ 1].cap += aug;
+            }
+            flow += aug;
+            cost += aug * h[t];
+        }
+        return std::make_pair(flow, cost);
+    }
+    struct Edge {
+        int from;
+        int to;
+        T cap;
+        T cost;
+        T flow;
+    };
+    std::vector<Edge> edges() {
+        std::vector<Edge> a;
+        for (int i = 0; i < e.size(); i += 2) {
+            Edge x;
+            x.from = e[i + 1].to;
+            x.to = e[i].to;
+            x.cap = e[i].cap + e[i + 1].cap;
+            x.cost = e[i].cost;
+            x.flow = e[i + 1].cap;
+            a.push_back(x);
+        }
+        return a;
+    }
+};
+\end{lstlisting}
+
+
+\subsection{可行流/最大流}
+\begin{lstlisting}
+struct MCFGraph {
+    struct Edge {
+        int v, c, f;
+        Edge(int v, int c, int f) : v(v), c(c), f(f) {}
+    };
+    const int n;
+    std::vector<Edge> e;
+    std::vector<std::vector<int>> g;
+    std::vector<i64> h, dis;
+    std::vector<int> pre;
+    bool dijkstra(int s, int t) {
+        dis.assign(n, std::numeric_limits<i64>::max());
+        pre.assign(n, -1);
+        std::priority_queue<std::pair<i64, int>, std::vector<std::pair<i64, int>>, std::greater<std::pair<i64, int>>> que;
+        dis[s] = 0;
+        que.emplace(0, s);
+        while (!que.empty()) {
+            i64 d = que.top().first;
+            int u = que.top().second;
+            que.pop();
+            if (dis[u] < d) continue;
+            for (int i : g[u]) {
+                int v = e[i].v;
+                int c = e[i].c;
+                int f = e[i].f;
+                if (c > 0 && dis[v] > d + h[u] - h[v] + f) {
+                    dis[v] = d + h[u] - h[v] + f;
+                    pre[v] = i;
+                    que.emplace(dis[v], v);
+                }
+            }
+        }
+        return dis[t] != std::numeric_limits<i64>::max();
+    }
+    MCFGraph(int n) : n(n), g(n) {}
+    //可行流
+    void addEdge(int u, int v, int c, int f) {
+        if (f < 0) {
+            g[u].push_back(e.size());
+            e.emplace_back(v, 0, f);
+            g[v].push_back(e.size());
+            e.emplace_back(u, c, -f);
+        } else {
+            g[u].push_back(e.size());
+            e.emplace_back(v, c, f);
+            g[v].push_back(e.size());
+            e.emplace_back(u, 0, -f);
+        }
+    }
+    //最大流
+    /*void addEdge(int u, int v, int c, int f) {
+    g[u].push_back(e.size());
+    e.emplace_back(v, c, f);
+    g[v].push_back(e.size());
+    e.emplace_back(u, 0, -f);
+    }*/
+    std::pair<int, i64> flow(int s, int t) {
+        int flow = 0;
+        i64 cost = 0;
+        h.assign(n, 0);
+        while (dijkstra(s, t)) {
+            for (int i = 0; i < n; ++i) h[i] += dis[i];
+            int aug = std::numeric_limits<int>::max();
+            for (int i = t; i != s; i = e[pre[i] ^ 1].v) aug = std::min(aug, e[pre[i]].c);
+            for (int i = t; i != s; i = e[pre[i] ^ 1].v) {
+                e[pre[i]].c -= aug;
+                e[pre[i] ^ 1].c += aug;
+            }
+            flow += aug;
+            cost += i64(aug) * h[t];
+        }
+        return std::make_pair(flow, cost);
+    }
+};
+\end{lstlisting}
+
+\subsection{TwoSat}
+\begin{lstlisting}
+struct TwoSat {
+    int n;
+    std::vector<std::vector<int>> e;
+    std::vector<bool> ans;
+    TwoSat(int n) : n(n), e(2 * n), ans(n) {}
+    void addClause(int u, bool f, int v, bool g) {
+        e[2 * u + !f].push_back(2 * v + g);
+        e[2 * v + !g].push_back(2 * u + f);
+    }
+    bool satisfiable() {
+        std::vector<int> id(2 * n, -1), dfn(2 * n, -1), low(2 * n, -1);
+        std::vector<int> stk;
+        int now = 0, cnt = 0;
+        std::function<void(int)> tarjan = [&](int u) {
+            stk.push_back(u);
+            dfn[u] = low[u] = now++;
+            for (auto v : e[u]) {
+                if (dfn[v] == -1) {
+                    tarjan(v);
+                    low[u] = std::min(low[u], low[v]);
+                } else if (id[v] == -1) {
+                    low[u] = std::min(low[u], dfn[v]);
+                }
+            }
+            if (dfn[u] == low[u]) {
+                int v;
+                do {
+                    v = stk.back();
+                    stk.pop_back();
+                    id[v] = cnt;
+                } while (v != u);
+                ++cnt;
+            }
+        };
+        for (int i = 0; i < 2 * n; ++i) if (dfn[i] == -1) tarjan(i);
+        for (int i = 0; i < n; ++i) {
+            if (id[2 * i] == id[2 * i + 1]) return false;
+            ans[i] = id[2 * i] > id[2 * i + 1];
+        }
+        return true;
+    }
+    std::vector<bool> answer() { return ans; }
+};
+\end{lstlisting}

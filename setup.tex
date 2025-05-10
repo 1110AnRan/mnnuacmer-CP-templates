@@ -1,0 +1,113 @@
+\usepackage[UTF8]{ctex}
+\usepackage[a4paper, margin=2cm]{geometry}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{titlesec}
+\usepackage{datetime}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usepackage{xpatch}
+\usepackage{titling}
+\usepackage{makeidx}
+\usepackage{tocloft}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{lipsum}
+
+
+\graphicspath{{./figure/}}
+
+% 目录页眉
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \lhead{\\\
+    \scriptsize{2025~年~05~月}}
+    \chead{\centering{算法竞赛模板 \\
+    \scriptsize{\textbf{The template of Competitive Program by xjh}}}}
+    \rhead{\\
+    \scriptsize{May, 2025}}
+    \lfoot{}
+    \cfoot{}
+    \rfoot{}
+}
+
+
+% 定义章节页眉显示规则
+\fancypagestyle{mainstyle}{
+    \fancyhf{}
+    \fancyhead[L]{\small\itshape\leftmark}  % 左侧显示当前章节
+    \fancyhead[R]{\small\thepage}           % 右侧显示页码
+    \renewcommand{\headrulewidth}{0.4pt}
+}
+
+
+
+
+% 封面设计
+\newcommand{\coverpage} {
+    \thispagestyle{empty}
+    \begin{center}
+        \vspace*{5cm}
+        % \includegraphics[width=0.3\textwidth]{icpc.jpg} \\[1cm]
+
+        % 使用两个minipage实现并排图片
+        \begin{minipage}[c]{0.48\textwidth} % 左边图片
+            \centering
+            \includegraphics[width=0.9\linewidth]{闽南师范大学.jpg}
+        \end{minipage}
+        \hfill % 添加弹性间距
+        \begin{minipage}[c]{0.48\textwidth} % 右边图片
+            \centering
+            \includegraphics[width=0.9\linewidth]{icpc.jpg}
+        \end{minipage}
+        \\[1.5cm] % 图片下方间距
+        \textbf{\Huge 算法竞赛模板} \\[1cm]
+        
+
+        \begin{tabularx}{0.8\textwidth}{Xl}
+            组织编写： & 22网络-1 肖建华 \\
+            内容编写： & 22网络-1 肖建华 24软件-1 庄瑜  \\
+            最后提交日期： & \today \\ 
+        \end{tabularx} \\[2cm]
+        
+        \textit{\large 计算机学院} \\
+        \textcolor{blue}{\large 2024年春季学期}
+
+
+    \end{center}
+    \clearpage
+}
+
+% ========== 亮色主题代码样式 ==========
+\definecolor{lightBG}{RGB}{255,255,255}       % 白色背景
+\definecolor{lightText}{RGB}{36,41,46}        % 深灰文本
+\definecolor{lightKeyword}{RGB}{215,58,73}    % 红色关键字
+\definecolor{lightString}{RGB}{3,47,98}       % 深蓝字符串
+\definecolor{lightComment}{RGB}{106,115,125}  % 灰绿注释
+
+\lstset{
+    backgroundcolor=\color{lightBG},       % 白色背景
+    basicstyle=\ttfamily\color{lightText}, % 深灰文本
+    keywordstyle=\color{lightKeyword},     % 红色关键字
+    stringstyle=\color{lightString},       % 深蓝字符串
+    commentstyle=\itshape\color{lightComment}, % 灰绿注释
+    breaklines=true,
+    numbers=left,
+    numberstyle=\large\color{gray},      % 浅灰行号
+    framesep=10pt,
+    tabsize=4,
+    showspaces=false,
+    showstringspaces=false,
+    language=C++,
+}
+
+
+\renewcommand{\cfttoctitlefont}{\Huge\bfseries\centering}
+\setlength{\cftbeforetoctitleskip}{-2em} % 标题位置调整
+
+
+% ========== 目录格式设置 ==========
+\titleformat{\section}[block]{\Large\bfseries\filcenter}{}{0em}{}
+

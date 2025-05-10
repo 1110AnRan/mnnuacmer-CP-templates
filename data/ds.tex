@@ -1,0 +1,551 @@
+\section{数据结构专题模板}
+
+\subsection{普通并查集}
+\begin{lstlisting}
+struct DSU {
+	std::vector<int> f, siz;
+
+	DSU() {}
+	DSU(int n){
+		init(n);
+	}
+	
+	void init(int n){
+		f.resize(n);
+		std::iota(f.begin(), f.end(), 0);
+		siz.assign(n, 1);
+	}
+
+	int find(int x){
+		while(x != f[x]){
+			x = f[x] = f[f[x]];
+		}
+		return x;
+	}
+
+	bool same(int x,int y){
+		return find(x) == find(y);
+	}
+
+	bool merge(int x,int y){
+		x = find(x);
+		y = find(y);
+		if(x == y){
+			return false;
+		}
+		siz[x] += siz[y];
+		f[y] = x;
+		return true;
+	}
+
+	int size(int x){
+		return siz[find(x)];
+	}
+};
+\end{lstlisting}
+\subsection{带权并查集}
+\begin{lstlisting}
+struct WDSU {
+    std::vector<int> dist, f;
+
+    WDSU() {}
+
+    WDSU(int n) {
+        init(n);
+    }
+
+    void init(int n) {
+        f.resize(n);
+        std::iota(f.begin(), f.end(), 0);
+        dist.assign(n, 0);
+    }
+
+    int find(int x) {
+        while(x != f[x]) {
+            int tmp = f[x];
+            f[x] = find(tmp);
+            dist[x] += dist[tmp];
+        }
+        return f[x];
+    }
+
+    bool merge(int l, int r, int v) {
+        int lf = find(l), rf = find(r);
+        if(lf != rf) {
+            f[lf] = rf;
+            dist[lf] = v + dist[r] - dist[l];
+        }
+    }
+
+    int query(int l, int r) {
+        if(find(l) != find(r)) {
+            return -1;
+        }
+        return dist[l] - dist[r];
+    }
+};
+\end{lstlisting}
+
+\subsection{可撤销并查集}
+\begin{lstlisting}
+struct UndoDSU {
+	std::vector<int> f, siz, rank;
+    std::stack<std::pair<int, int>> stk;
+
+	DSU() {}
+	DSU(int n){
+		init(n);
+	}
+	
+	void init(int n){
+		f.resize(n);
+		std::iota(f.begin(), f.end(), 0);
+		siz.assign(n, 1);
+        rank.assign(n, 0);
+	}
+
+	int find(int x){
+		while(x != f[x]){
+			x = f[x];
+		}
+		return x;
+	}
+
+	bool same(int x,int y){
+		return find(x) == find(y);
+	}
+
+	bool merge(int x,int y){
+		x = find(x);
+		y = find(y);
+		if(x == y){
+            stk.push({-1, -1});
+			return false;
+		}
+        if(rank[x] > rank[y]) {
+            std::swap(x, y);
+        }
+
+        f[x] = y;
+        siz[y] += siz[x];
+        stk.push({x, 0});
+        if(rank[x] == rank[y]) {
+            rank[y]++;
+            stk.top().second = 1;
+        }
+
+	}
+
+    void rollback() {
+        auto v = stk.top();
+        stk.pop();
+        if(v.first == -1) {
+            return;
+        }
+        int x = v.first, y = f[x];
+        rank[y] -= v.second;
+        siz[y] -= siz[x];
+        f[x] = x;
+    }
+
+	int size(int x){
+		return siz[find(x)];
+	}
+};
+\end{lstlisting}
+
+\subsection{树状数组}
+\begin{lstlisting}
+template <typename T>
+struct Fenwick {
+    int n;
+    std::vector<T> a;
+    
+    Fenwick(int n_ = 0) {
+        init(n_);
+    }
+    
+    void init(int n_) {
+        n = n_;
+        a.assign(n, T{});
+    }
+    
+    void add(int x, const T &v) {
+        for (int i = x + 1; i <= n; i += i & -i) {
+            a[i - 1] = a[i - 1] + v;
+        }
+    }
+    
+    T sum(int x) {
+        T ans{};
+        for (int i = x; i > 0; i -= i & -i) {
+            ans = ans + a[i - 1];
+        }
+        return ans;
+    }
+    
+    T rangeSum(int l, int r) {
+        return sum(r) - sum(l);
+    }
+    
+    // first p, query(0, p) >= k
+    int select(const T &k) {
+        int x = 0;
+        T cur{};
+        for (int i = 1 << std::__lg(n); i; i /= 2) {
+            if (x + i <= n && cur + a[x + i - 1] <= k) {
+                x += i;
+                cur = cur + a[x - 1];
+            }
+        }
+        return x;
+    }
+};
+\end{lstlisting}
+
+\subsection{二维树状数组}
+\begin{lstlisting}
+struct BIT_2D {
+    using T = long long;
+    int n, m;
+    vector<vector<T>> sum[4];
+    BIT_2D(int _n, int _m):n(_n), m(_m) {
+        for (int i=0; i<4; ++i) sum[i].assign(n+1, vector<T>(m+1, 0));
+    }
+    void add(int x, int y, T val) {
+        for (int i=x; i<=n; i+=i&-i) {
+            for (int j=y; j<=m; j+=j&-j) {
+                sum[0][i][j]+=val;
+                sum[1][i][j]+=val*x;
+                sum[2][i][j]+=val*y;
+                sum[3][i][j]+=val*x*y;
+            }
+        }
+    }
+    void range_add(int x1, int y1, int x2, int y2, T x) {
+        add(x1, y1, x);
+        add(x1, y2+1, -x);
+        add(x2+1, y1, -x);
+        add(x2+1, y2+1, x);
+    }
+    T ask(int x, int y) {
+        T res[4]= {};
+        for (int i=x; i>0; i-=i&-i)
+            for (int j=y; j>0; j-=j&-j)
+                for (int k=0; k<4; ++k)
+                    res[k]+=sum[k][i][j];
+        return (x+1)*(y+1)*res[0]-(y+1)*res[1]-(x+1)*res[2]+res[3];
+    }
+    T range_ask(int x1, int y1, int x2, int y2) {
+        return ask(x2, y2)-ask(x1-1, y2)-ask(x2, y1-1)+ask(x1-1, y1-1);
+    }
+};
+\end{lstlisting}
+
+\subsection{线段树}
+\subsubsection{无lazy}
+\begin{lstlisting}
+template<class Info>
+struct SegmentTree {
+    int n;
+    std::vector<Info> info;
+    SegmentTree() : n(0) {}
+    SegmentTree(int n_, Info v_ = Info()) {
+        init(n_, v_);
+    }
+    template<class T>
+    SegmentTree(std::vector<T> init_) {
+        init(init_);
+    }
+    void init(int n_, Info v_ = Info()) {
+        init(std::vector(n_, v_));
+    }
+    template<class T>
+    void init(std::vector<T> init_) {
+        n = init_.size();
+        info.assign(4 << std::__lg(n), Info());
+        std::function<void(int, int, int)> build = [&](int p, int l, int r) {
+            if (r - l == 1) {
+                info[p] = init_[l];
+                return;
+            }
+            int m = (l + r) / 2;
+            build(2 * p, l, m);
+            build(2 * p + 1, m, r);
+            pull(p);
+        };
+        build(1, 0, n);
+    }
+    void pull(int p) {
+        info[p] = info[2 * p] + info[2 * p + 1];
+    }
+    void modify(int p, int l, int r, int x, const Info &v) {
+        if (r - l == 1) {
+            info[p] = v;
+            return;
+        }
+        int m = (l + r) / 2;
+        if (x < m) {
+            modify(2 * p, l, m, x, v);
+        } else {
+            modify(2 * p + 1, m, r, x, v);
+        }
+        pull(p);
+    }
+    void modify(int p, const Info &v) {
+        modify(1, 0, n, p, v);
+    }
+    Info rangeQuery(int p, int l, int r, int x, int y) {
+        if (l >= y || r <= x) {
+            return Info();
+        }
+        if (l >= x && r <= y) {
+            return info[p];
+        }
+        int m = (l + r) / 2;
+        return rangeQuery(2 * p, l, m, x, y) \
+            + \
+            rangeQuery(2 * p + 1, m, r, x, y);
+    }
+    Info rangeQuery(int l, int r) {
+        return rangeQuery(1, 0, n, l, r);
+    }
+    template<class F>
+    int findFirst(int p, int l, int r, int x, int y, F &&pred) {
+        if (l >= y || r <= x) {
+            return -1;
+        }
+        if (l >= x && r <= y && !pred(info[p])) {
+            return -1;
+        }
+        if (r - l == 1) {
+            return l;
+        }
+        int m = (l + r) / 2;
+        int res = findFirst(2 * p, l, m, x, y, pred);
+        if (res == -1) {
+            res = findFirst(2 * p + 1, m, r, x, y, pred);
+        }
+        return res;
+    }
+    template<class F>
+    int findFirst(int l, int r, F &&pred) {
+        return findFirst(1, 0, n, l, r, pred);
+    }
+    template<class F>
+    int findLast(int p, int l, int r, int x, int y, F &&pred) {
+        if (l >= y || r <= x) {
+            return -1;
+        }
+        if (l >= x && r <= y && !pred(info[p])) {
+            return -1;
+        }
+        if (r - l == 1) {
+            return l;
+        }
+        int m = (l + r) / 2;
+        int res = findLast(2 * p + 1, m, r, x, y, pred);
+        if (res == -1) {
+            res = findLast(2 * p, l, m, x, y, pred);
+        }
+        return res;
+    }
+    template<class F>
+    int findLast(int l, int r, F &&pred) {
+        return findLast(1, 0, n, l, r, pred);
+    }
+};
+\end{lstlisting}
+
+\subsubsection{有lazy}
+\begin{lstlisting}
+template<class Info, class Tag>
+struct LazySegmentTree {
+    int n;
+    std::vector<Info> info;
+    std::vector<Tag> tag;
+    LazySegmentTree() : n(0) {}
+    LazySegmentTree(int n_, Info v_ = Info()) {
+        init(n_, v_);
+    }
+    template<class T>
+    LazySegmentTree(std::vector<T> init_) {
+        init(init_);
+    }
+    void init(int n_, Info v_ = Info()) {
+        init(std::vector(n_, v_));
+    }
+    template<class T>
+    void init(std::vector<T> init_) {
+        n = init_.size();
+        info.assign(4 << std::__lg(n), Info());
+        tag.assign(4 << std::__lg(n), Tag());
+        std::function<void(int, int, int)> build = [&](int p, int l, int r) {
+            if (r - l == 1) {
+                info[p] = init_[l];
+                return;
+            }
+            int m = (l + r) / 2;
+            build(2 * p, l, m);
+            build(2 * p + 1, m, r);
+            pull(p);
+        };
+        build(1, 0, n);
+    }
+    void pull(int p) {
+        info[p] = info[2 * p] + info[2 * p + 1];
+    }
+    void apply(int p, const Tag &v) {
+        info[p].apply(v);
+        tag[p].apply(v);
+    }
+    void push(int p) {
+        apply(2 * p, tag[p]);
+        apply(2 * p + 1, tag[p]);
+        tag[p] = Tag();
+    }
+    void modify(int p, int l, int r, int x, const Info &v) {
+        if (r - l == 1) {
+            info[p] = v;
+            return;
+        }
+        int m = (l + r) / 2;
+        push(p);
+        if (x < m) {
+            modify(2 * p, l, m, x, v);
+        } else {
+            modify(2 * p + 1, m, r, x, v);
+        }
+        pull(p);
+    }
+    void modify(int p, const Info &v) {
+        modify(1, 0, n, p, v);
+    }
+    Info rangeQuery(int p, int l, int r, int x, int y) {
+        if (l >= y || r <= x) {
+            return Info();
+        }
+        if (l >= x && r <= y) {
+            return info[p];
+        }
+        int m = (l + r) / 2;
+        push(p);
+        return rangeQuery(2 * p, l, m, x, y) \ 
+                + \
+                rangeQuery(2 * p + 1, m, r, x, y);
+    }
+    Info rangeQuery(int l, int r) {
+        return rangeQuery(1, 0, n, l, r);
+    }
+    void rangeApply(int p, int l, int r, int x, int y, const Tag &v) {
+        if (l >= y || r <= x) {
+            return;
+        }
+        if (l >= x && r <= y) {
+            apply(p, v);
+            return;
+        }
+        int m = (l + r) / 2;
+        push(p);
+        rangeApply(2 * p, l, m, x, y, v);
+        rangeApply(2 * p + 1, m, r, x, y, v);
+        pull(p);
+    }
+    void rangeApply(int l, int r, const Tag &v) {
+        return rangeApply(1, 0, n, l, r, v);
+    }
+    template<class F>
+    int findFirst(int p, int l, int r, int x, int y, F pred) {
+        if (l >= y || r <= x || !pred(info[p])) {
+            return -1;
+        }
+        if (r - l == 1) {
+            return l;
+        }
+        int m = (l + r) / 2;
+        push(p);
+        int res = findFirst(2 * p, l, m, x, y, pred);
+        if (res == -1) {
+            res = findFirst(2 * p + 1, m, r, x, y, pred);
+        }
+        return res;
+    }
+    template<class F>
+    int findFirst(int l, int r, F pred) {
+        return findFirst(1, 0, n, l, r, pred);
+    }
+    template<class F>
+    int findLast(int p, int l, int r, int x, int y, F pred) {
+        if (l >= y || r <= x || !pred(info[p])) {
+            return -1;
+        }
+        if (r - l == 1) {
+            return l;
+        }
+        int m = (l + r) / 2;
+        push(p);
+        int res = findLast(2 * p + 1, m, r, x, y, pred);
+        if (res == -1) {
+            res = findLast(2 * p, l, m, x, y, pred);
+        }
+        return res;
+    }
+    template<class F>
+    int findLast(int l, int r, F pred) {
+        return findLast(1, 0, n, l, r, pred);
+    }
+};
+\end{lstlisting}
+
+\subsection{ST表}
+\begin{lstlisting}
+// vector<int> a(n + 1);
+template<typename T>
+class SparseTable {
+public:
+    SparseTable() = default;
+    
+    explicit SparseTable(const std::vector<T>& data) 
+    {
+        Initialize(data);
+    }
+
+    void Initialize(const std::vector<T>& data) {
+        this->n = data.size() - 1;
+
+        log_table.resize(n + 1);
+        log_table[0] = -1;
+        for(int i = 1; i <= n; i++) {
+            log_table[i] = log_table[i >> 1] + 1;
+        }
+
+        st_table.resize(n + 1, std::vector<int>(21));
+        
+        for(int i = 1; i <= n; i++) {
+            st_table[i][0] = data[i];
+        }
+
+        for(int p = 1; p <= log_table[n]; p++) {
+            for(int i = 1; i + (1 << p) - 1 <= n; i++) {
+                st_table[i][p] = op(st_table[i][p - 1], 
+                    st_table[i + (1 << (p - 1))][p - 1]);
+            }
+        }
+
+    }
+
+    T Query(size_t left, size_t right) {
+        const int k = log_table[right - left + 1];
+        return op(st_table[left][k], st_table[right - (1 << k) + 1][k]);
+    }
+
+private:
+    int n;
+    std::vector<int> log_table;
+    std::vector<std::vector<T>> st_table;
+
+    T op(const T& lv, const T& rv) const {
+        return std::max(lv, rv);
+    }
+};
+\end{lstlisting}
