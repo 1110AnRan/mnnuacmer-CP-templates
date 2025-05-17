@@ -56,6 +56,8 @@ static const int N = 1e5 + 5;
 StringHash<N> h;
 \end{lstlisting}
 
+
+
 \subsection{AC自动机}
 \begin{lstlisting}
 template<u64 MAXN, u64 MAXS>
@@ -159,6 +161,8 @@ struct AhoCorasick {
 };
 \end{lstlisting}
 
+
+
 \subsection{马拉车}
 \begin{lstlisting}
 // the real length in s from p is p[i] - 1
@@ -185,6 +189,7 @@ std::vector<int> manacher(std::string s) {
 }
 \end{lstlisting}
 
+
 \subsection{Z函数}
 \begin{lstlisting}
 std::vector<int> zFunction(std::string s) {
@@ -205,6 +210,8 @@ std::vector<int> zFunction(std::string s) {
     return z;
 }
 \end{lstlisting}
+
+
 
 \subsection{后缀数组}
 \begin{lstlisting}
@@ -256,6 +263,8 @@ struct SuffixArray {
     }
 };
 \end{lstlisting}
+
+
 \subsubsection{使用方法示例}
 \begin{lstlisting}
 // deepseek
@@ -374,6 +383,8 @@ struct PAM {
 PAM pam;
 \end{lstlisting}
 
+
+
 \subsection{KMP}
 \begin{lstlisting}
 template <typename T>
@@ -484,3 +495,4 @@ using KMP_string = KMP<std::string>;
 template <typename ValueType>
 using KMP_vector = KMP<std::vector<ValueType>>;
 \end{lstlisting}
+

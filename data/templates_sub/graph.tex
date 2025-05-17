@@ -20,6 +20,8 @@ void addEdge(int u, int v, int w = 1) {
 }
 \end{lstlisting}
 
+
+
 \subsection{Dijkstra}
 \begin{lstlisting}
 struct Dijkstra {   // index-base-0
@@ -105,7 +107,8 @@ struct Spfa {   // index-base-0
 		std::vector<int> cnt(n, 0);
         dis.assign(n, inf);
 		dis[root] = 0;
-        // dis.assign(n, -inf); 最长路
+        // 最长路
+        // dis.assign(n, -inf);
 		std::queue<int> q;
 		q.push(root);
 		vis[root] = true;
@@ -130,6 +133,8 @@ struct Spfa {   // index-base-0
 	}
 };
 \end{lstlisting}
+
+
 
 \subsection{Floyd}
 \begin{lstlisting}
@@ -161,6 +166,7 @@ void floyd(std::vector<std::vector<int>>& dis, std::vector<std::vector<Z>>& f) {
                 }
 }
 \end{lstlisting}
+
 
 \subsection{Kruskal}
 \begin{lstlisting}
@@ -202,6 +208,7 @@ struct KruskalMst {		// index-base-0
 };
 \end{lstlisting}
 
+
 \subsection{二分图最大匹配}
 \subsubsection{匈牙利算法}
 \begin{lstlisting}
@@ -242,6 +249,7 @@ struct BipartiteGraph {		// index-base-0
     }
 };
 \end{lstlisting}
+
 
 \subsubsection{HK算法}
 \begin{lstlisting}
@@ -320,6 +328,7 @@ struct HopcroftKarp {		// index-base-0
 };
 \end{lstlisting}
 
+
 \subsection{二分图判定}
 \begin{lstlisting}
 struct JudgeBG {	// index-base-0
@@ -378,6 +387,7 @@ struct JudgeBG {	// index-base-0
     // }
 };
 \end{lstlisting}
+
 
 \subsection{Kruskal重构树}
 \begin{lstlisting}
@@ -542,6 +552,7 @@ struct SCC {
 };
 \end{lstlisting}
 
+
 \subsection{EBCC边-双连通分量}
 \begin{lstlisting}
 std::set<std::pair<int, int>> E;
@@ -632,6 +643,7 @@ struct EBCC {
     }
 };
 \end{lstlisting}
+
 
 \subsection{MaxFlow}
 \begin{lstlisting}
@@ -843,6 +855,7 @@ struct MinCostFlow {
 \end{lstlisting}
 
 
+
 \subsection{可行流/最大流}
 \begin{lstlisting}
 struct MCFGraph {
@@ -967,3 +980,4 @@ struct TwoSat {
     std::vector<bool> answer() { return ans; }
 };
 \end{lstlisting}
+
