@@ -1,0 +1,11 @@
+\subsubsection{搜索操作}
+\begin{enumerate}
+    \item $bool\ all\_of(first,\ last,\ compare)$，判断区间的数是否全符合$compare$；
+    \item $bool\ any\_of(first,\ last,\ compare)$，判断区间的数是否存在一个$compare$；
+    \item $bool\ none\_of(first,\ last,\ compare)$，判断区间的数是否都不符合$compare$；
+    \item $iterator\ find(first,\ last,\ val\_a)$，返回区间中第一个等于$val\_a$的位置，否则返回$last$；
+    \item $iterator\ find\_if(first,\ last,\ compare)$，返回区间中第一个满足$compare$的位置，否则返回$last$；
+    \item $iterator\ find\_if\_not(first,\ last,\ compare)$，返回区间中第一个不满足$compare$的位置，否则返回$last$；
+    \item $size\_t\ count(first,\ last,\ val\_a)$，返回区间中等于$val\_a$的个数；
+    \item $size\_t\ count\_if(first,\ last,\ compare)$，返回区间中满足$compare$的个数；
+\end{enumerate}

@@ -1,0 +1,60 @@
+\section{常用STL}
+
+\begin{table}[htbp]
+  \centering
+  \caption{关键值说明表}
+  \rowcolors{2}{white}{gray!10} % 隔行浅灰背景
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X >{\centering\arraybackslash}X >{\raggedleft\arraybackslash}X}
+    \toprule
+    \rowcolor{headerbg}
+    \textbf{值} & \textbf{含义} & \textbf{备注} \\
+    \midrule
+    区间 & [first, last) & 左闭右开 \\
+    前缀$val$ & 基本数据类型 & 与同行中的$val\_x$同类型 \\
+    前缀$T$ & 任意数据类型 & 模板类 \\
+    排序 & 排序操作相关 & 默认按照$std::less()$排序 \\
+    $compare$ & 自定义比较类型 & 需重载操作符$()$或使用lambda表达式 \\
+    $iterator$ & 迭代器类型 & 迭代器 \\
+    $dest$ & 容器 & 目标容器 \\
+    $bid$ & $std::back\_inserter(dest)$ & 一个定义 \\
+    $size_t$ & 无符号整型 & \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection{算法库}
+
+\input{data/stls_sub/algorithms_library/search_operations.tex}
+
+% 交换操作
+\input{data/stls_sub/algorithms_library/swap_operations.tex}
+
+% 生成操作
+\input{data/stls_sub/algorithms_library/generation_operations.tex}
+
+% 移除操作
+\input{data/stls_sub/algorithms_library/removing_operations.tex}
+
+% 顺序变更操作
+\input{data/stls_sub/algorithms_library/order-changing_operations.tex}
+
+% 划分操作
+\input{data/stls_sub/algorithms_library/partitioning_operations.tex}
+
+% 排序操作
+\input{data/stls_sub/algorithms_library/sorting_operations.tex}
+
+% 二分搜索操作
+\input{data/stls_sub/algorithms_library/binary_search_operations.tex}
+
+% 集合操作（在已排序范围上）
+\input{data/stls_sub/algorithms_library/set_operations.tex}
+
+% 最小/最大操作
+\input{data/stls_sub/algorithms_library/mini(maxi)mum_operations.tex}
+
+% 排列操作
+\input{data/stls_sub/algorithms_library/permutation_operations.tex}
+
+% 数值运算
+\input{data/stls_sub/algorithms_library/numeric_operations.tex}

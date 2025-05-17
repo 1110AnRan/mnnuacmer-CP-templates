@@ -1,11 +1,9 @@
 \usepackage[UTF8]{ctex}
 \usepackage[a4paper, margin=2cm]{geometry}
-\usepackage{xcolor}
 \usepackage{listings}
 \usepackage{titlesec}
 \usepackage{datetime}
 \usepackage{graphicx}
-\usepackage{tabularx}
 \usepackage{tikz}
 \usepackage{xpatch}
 \usepackage{titling}
@@ -15,6 +13,12 @@
 \usepackage{fancyhdr}
 \usepackage{lastpage}
 \usepackage{lipsum}
+\usepackage{tcolorbox}
+\usepackage{array, booktabs, tabularx}
+\usepackage[table]{xcolor}
+\usepackage{enumitem}
+\usepackage{xeCJK}
+
 
 
 \graphicspath{{./figure/}}
@@ -25,7 +29,7 @@
     \lhead{\\\
     \scriptsize{2025~年~05~月}}
     \chead{\centering{算法竞赛模板 \\
-    \scriptsize{\textbf{The template of Competitive Program by xjh}}}}
+    \scriptsize{\textbf{The template of Competitive Program by mnnuer}}}}
     \rhead{\\
     \scriptsize{May, 2025}}
     \lfoot{}
@@ -68,7 +72,7 @@
 
         \begin{tabularx}{0.8\textwidth}{Xl}
             组织编写： & 22网络-1 肖建华 \\
-            内容编写： & 22网络-1 肖建华 24软件-1 庄瑜  \\
+            内容编写： & 22网络-1 肖建华 \\
             最后提交日期： & \today \\ 
         \end{tabularx} \\[2cm]
         
@@ -79,6 +83,21 @@
     \end{center}
     \clearpage
 }
+
+\tcbset{
+    outstyle/.style={ % 自定义样式名称（可任意命名）
+        colback = white,          % 背景色
+        colframe = black,         % 边框色
+        arc = 3mm,                % 边框圆角
+        boxrule = 1pt,            % 边框粗细
+        fonttitle = \bfseries,
+        left = 5mm,               % 左内边距
+        right = 5mm,              % 右内边距
+        top = 2mm,                % 上内边距
+        bottom = 2mm,             % 下内边距
+    },
+}
+
 
 % ========== 亮色主题代码样式 ==========
 \definecolor{lightBG}{RGB}{255,255,255}       % 白色背景
@@ -104,10 +123,24 @@
 }
 
 
+% 定义表格背景颜色
+\definecolor{headerbg}{RGB}{230, 240, 255}
+\definecolor{gray10}{RGB}{240, 240, 240}
+
+% 定义列表
+\renewcommand{\labelenumii}{\arabic{enumi}.\arabic{enumii}}
+\renewcommand{\labelenumiii}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}}
+\renewcommand{\labelenumiv}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}.\arabic{enumiv}}
+
+
 \renewcommand{\cfttoctitlefont}{\Huge\bfseries\centering}
 \setlength{\cftbeforetoctitleskip}{-2em} % 标题位置调整
 
 
 % ========== 目录格式设置 ==========
 \titleformat{\section}[block]{\Large\bfseries\filcenter}{}{0em}{}
+
+% 设置四级标题
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
 
