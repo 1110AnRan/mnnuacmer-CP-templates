@@ -41,8 +41,14 @@ struct DSU {
 	int size(int x){
 		return siz[find(x)];
 	}
+
+    int operator[](const int x) {
+		return find(x);
+	}
 };
 \end{lstlisting}
+
+
 \subsection{带权并查集}
 \begin{lstlisting}
 struct WDSU {
@@ -83,8 +89,13 @@ struct WDSU {
         }
         return dist[l] - dist[r];
     }
+    int operator[](const int x) {
+        return find(x);
+    }
 };
 \end{lstlisting}
+
+
 
 \subsection{可撤销并查集}
 \begin{lstlisting}
@@ -151,8 +162,13 @@ struct UndoDSU {
 	int size(int x){
 		return siz[find(x)];
 	}
+    int operator[](const int x) {
+        return find(x);
+    }
 };
 \end{lstlisting}
+
+
 
 \subsection{树状数组}
 \begin{lstlisting}
@@ -203,6 +219,8 @@ struct Fenwick {
 };
 \end{lstlisting}
 
+
+
 \subsection{二维树状数组}
 \begin{lstlisting}
 struct BIT_2D {
@@ -241,6 +259,8 @@ struct BIT_2D {
     }
 };
 \end{lstlisting}
+
+
 
 \subsection{线段树}
 \subsubsection{无lazy}
@@ -356,6 +376,8 @@ struct SegmentTree {
     }
 };
 \end{lstlisting}
+
+
 
 \subsubsection{有lazy}
 \begin{lstlisting}
@@ -497,6 +519,8 @@ struct LazySegmentTree {
 };
 \end{lstlisting}
 
+
+
 \subsection{ST表}
 \begin{lstlisting}
 // vector<int> a(n + 1);
@@ -549,3 +573,4 @@ private:
     }
 };
 \end{lstlisting}
+
