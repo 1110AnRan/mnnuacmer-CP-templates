@@ -1,5 +1,5 @@
 \usepackage[UTF8]{ctex}
-\usepackage[a4paper, margin=2cm]{geometry}
+\usepackage[a4paper, top=2cm, bottom=2cm, left=2.5cm, right=2.5cm]{geometry}
 \usepackage{listings}
 \usepackage{titlesec}
 \usepackage{datetime}
@@ -18,6 +18,8 @@
 \usepackage[table]{xcolor}
 \usepackage{enumitem}
 \usepackage{xeCJK}
+\usepackage{amsmath, amssymb, amsthm}
+\tcbuselibrary{theorems, breakable, skins}
 
 
 
@@ -32,9 +34,6 @@
     \scriptsize{\textbf{The template of Competitive Program by mnnuer}}}}
     \rhead{\\
     \scriptsize{May, 2025}}
-    \lfoot{}
-    \cfoot{}
-    \rfoot{}
 }
 
 
@@ -133,8 +132,11 @@
 \renewcommand{\labelenumiv}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}.\arabic{enumiv}}
 
 
+% 定义标题
 \renewcommand{\cfttoctitlefont}{\Huge\bfseries\centering}
 \setlength{\cftbeforetoctitleskip}{-2em} % 标题位置调整
+
+% 定义定义，理论等
 
 
 % ========== 目录格式设置 ==========

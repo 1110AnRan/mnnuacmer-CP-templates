@@ -384,6 +384,61 @@ struct HLD {
 };
 \end{lstlisting}
 
+\subsection{树上差分}
+
+\begin{quote}
+    注意！由于这部分内容大部分与树上$LCA$高度重合，因此在此作简要说明！ \\
+    树上$LCA$问题可以使用$HLD$或者倍增表实现！！！ \\
+    树上点的编号从$1$开始，并且我们认为$1$的父亲节点是编号$0$！！！
+\end{quote}
+
+\subsubsection{点差分}
+\begin{lstlisting}
+// modify
+int u, v;
+cin >> u >> v;
+lca = lca(u, v);
+lcafather = stjump[lca][0];
+num[u]++;
+num[v]++;
+num[lca]--;
+num[lcafather]--;
+
+// calc
+auto dfs = [&](this auto&&self, int u, int fa) -> void {
+    for(auto v : adj[u]) {
+        if(v != fa) {
+            self(v, u);
+            num[u] += num[v];
+        }
+    }
+};
+dfs(dfs, 1, 0);
+\end{lstlisting}
+
+\subsubsection{边差分}
+
+\begin{lstlisting}
+// modify
+int u, v;
+cin >> u >> v;
+lca = lca(u, v);
+lcafather = stjump[lca][0];
+num[u]++;
+num[v]++;
+num[lca]-=2;
+
+// calc
+auto dfs = [&](this auto&&self, int u, int fa) -> void {
+    for(auto v : adj[u]) {
+        if(v != fa) {
+            self(v, u);
+            num[u] += num[v];
+        }
+    }
+};
+dfs(dfs, 1, 0);
+\end{lstlisting}
 
 
 \subsection{Splay}
