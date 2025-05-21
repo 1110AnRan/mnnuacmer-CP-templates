@@ -8,7 +8,7 @@ struct Enode {
 int head[N], cnt = 0;
 
 void init() {
-    fill(head, head + N, -1);
+    std::fill(head, head + N, -1);
     cnt = 0;
 }
 
@@ -187,7 +187,7 @@ struct KruskalMst {		// index-base-0
         return f[u] == u ? u : f[u] = find(f[u]);
     }
     T work() {
-        std::sort(e.begin(),e.end());
+        std::sort(e.begin(), e.end());
         T ans = 0;
         int cnt = 0;
 		for(auto [w, u, v] : e) {
@@ -217,7 +217,7 @@ struct BipartiteGraph {		// index-base-0
     std::vector<std::vector<int>> g;
     std::vector<int> vis, link;
     BipartiteGraph(int n,int m)
-	:n(n),m(m),g(n),vis(m),link(m) {}
+	:n(n),m(m), g(n), vis(m), link(m) {}
 
     void addEdge(int u, int v) {// left->right
         g[u].push_back(v);

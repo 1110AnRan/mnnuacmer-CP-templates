@@ -1,0 +1,239 @@
+\subsection{数学定理}
+
+\begin{theorem}[欧几里得]
+若 $a, b$ 为整数，$b \ne 0$，则有 $\gcd(a, b) = \gcd(b, a \bmod b)$。
+\end{theorem}
+\begin{lstlisting}
+// 求最大公约数
+int gcd(int a, int b) {
+    return b == 0 ? a : gcd(b, a % b);
+}
+\end{lstlisting}
+
+\begin{theorem}[扩展欧几里得]
+设 $a, b \in \mathbb{Z}$ 且不全为零，则存在整数 $x, y$ 使得：
+\[
+ax + by = \gcd(a, b)
+\]
+\end{theorem}
+\begin{lstlisting}
+// 求一组解 (x, y) 满足 ax + by = gcd(a, b)
+int exgcd(int a, int b, int &x, int &y) {
+    if (!b) { x = 1; y = 0; return a; }
+    int d = exgcd(b, a % b, y, x);
+    y -= (a / b) * x;
+    return d;
+}
+\end{lstlisting}
+
+
+\begin{theorem}[模逆元]
+若 $\gcd(a, m) = 1$，则存在整数 $x$，使得：
+\[
+ax \equiv 1 \pmod{m}
+\]
+称 $x$ 为 $a$ 在模 $m$ 下的乘法逆元
+\end{theorem}
+\begin{lstlisting}
+// 计算 a 在 mod m 下的逆元（gcd(a, m) == 1）
+int modInverse(int a, int m) {
+    int x, y;
+    int d = exgcd(a, m, x, y);
+    if (d != 1) return -1;
+    return (x % m + m) % m;
+}
+\end{lstlisting}
+
+\begin{theorem}[线性不定方程求解]
+方程 $ax + by = c$ 有整数解当且仅当 $\gcd(a, b) \mid c$。 \\
+如果 $ax + by = d \quad d$ 为 $\gcd(a, b)$，其中一个特解是 $(x_0, y_0)$ \\
+则通解为：
+\[
+x = x_0 + (b / d) \ast n \qquad y = y_0 - (a / d) \ast n \quad n \in \mathbb{Z}
+\]
+如果 $ax + by = c \quad c$ 为 $d$ 的整数倍，根据上面的特解，可以得到该等式的一个特解 $(x_0', y_0')$ \\
+其中 $x_0' = x_0 \ast (c / d) \quad y_0' = y_0 \ast (c / d)$ \\
+则通解为：
+\[
+x = x_0' + (b / d) \ast n \quad y = y_0' - (a / d) \ast n \quad n \in \mathbb{Z}
+\]
+\end{theorem}
+\begin{lstlisting}
+// 解线性不定方程，返回一组整数解
+bool solveDiophantine(int a, int b, int c, int &x, int &y) {
+    int d = exgcd(a, b, x, y);
+    if (c % d != 0) return false;
+    int k = c / d;
+    x *= k;
+    y *= k;
+    return true;
+}
+\end{lstlisting}
+
+\begin{theorem}[解模线性方程]
+模线性方程 $ax \equiv b \pmod{m}$ 有解当且仅当 $gcd(a, m) \mid b$。
+\end{theorem}
+
+\begin{lstlisting}
+// 解 ax ≡ b mod m 的最小正整数解
+int modLinearSolve(int a, int b, int m) {
+    int x, y;
+    int d = exgcd(a, m, x, y);
+    if (b % d != 0) return -1;
+    x = x * (b / d);
+    return (x % (m / d) + (m / d)) % (m / d);
+}
+\end{lstlisting}
+
+\begin{theorem}[中国剩余定理]
+若 $\{m_i\}$ 两两互质，则同余方程组
+\[
+x \equiv a_i \pmod{m_i}, \quad i =  1,2,...,n
+\]
+有唯一解 $x \mod M$，其中 $M = \prod m_i$。
+\end{theorem}
+\begin{lstlisting}
+// CRT 模数互质情况，返回最小非负解 x
+using long long = i64;
+
+i64 CRT(const std::vector<int>& a, const std::vector<int>& m) {
+    i64 M = 1;
+    for (int mi : m) M *= mi;
+
+    i64 res = 0;
+    for (int i = 0; i < m.size(); ++i) {
+        i64 Mi = M / m[i];
+        int inv = modInverse(Mi % m[i], m[i]);
+        res = (res + 1LL * a[i] * Mi % M * inv % M) % M;
+    }
+    return (res + M) % M;
+}
+\end{lstlisting}
+
+\begin{theorem}[扩展中国剩余定理]
+对于模数不互质的同余方程组，若
+\[
+\gcd(m_i, m_j) \mid (a_i - a_j), \quad \forall i, j
+\]
+则存在整数解 $x$，并可通过逐步合并方式递推构造。
+\end{theorem}
+
+\begin{lstlisting}
+// exCRT 模数不互质情况，返回最小非负解 x
+using long long = i64;
+
+i64 exCRT(const std::vector<i64>& a, const std::vector<i64>& m) {
+    i64 x = a[0], mod = m[0];
+    for (int i = 1; i < a.size(); ++i) {
+        i64 a1 = mod, a2 = m[i];
+        i64 b = (a[i] - x % a2 + a2) % a2;
+
+        i64 s, t;
+        i64 d = exgcd(a1, a2, s, t);
+        if (b % d != 0) return -1;
+
+        i64 k = b / d;
+        s = (s % a2 + a2) % a2;
+        i64 tmp = (k * s) % (a2 / d);
+        x = x + tmp * mod;
+        mod = mod / d * a2;
+        x = (x % mod + mod) % mod;
+    }
+    return x;
+}
+\end{lstlisting}
+
+
+\begin{definition}[欧拉函数]
+对正整数 $n$, $\varphi(n)$ 表示不超过 $n$ 且与 $n$ 互质的正整数个数。
+\end{definition}
+
+\begin{lstlisting}
+// 单点欧拉函数
+int euler(int n) {
+    int res = n;
+    for (int i = 2; i * i <= n; ++i)
+        if (n % i == 0) {
+            res = res / i * (i - 1);
+            while (n % i == 0) n /= i;
+        }
+    if (n > 1) res = res / n * (n - 1);
+    return res;
+}
+\end{lstlisting}
+
+\begin{theorem}[鞋带公式]
+设有多边形的顶点 $(x_1, y_1), (x_2, y_2), \dots, (x_n, y_n)$，按照顺时针或逆时针顺序排列，闭合多边形的面积 $A$ 为：
+\[
+A = \frac{1}{2} \left| \sum_{i=1}^{n} (x_i y_{i+1} - x_{i+1} y_i) \right|
+\]
+其中 $(x_{n+1}, y_{n+1})$ 被认为是 $(x_1, y_1)$。
+\end{theorem}
+
+\begin{lstlisting}
+// 鞋带公式计算多边形面积
+double shoelaceFormula(std::vector<pair<int, int>>& points) {
+    int n = points.size();
+    double area = 0.0;
+    for (int i = 0; i < n; ++i) {
+        int j = (i + 1) % n;
+        area += (points[i].first * points[j].second - points[i].second * points[j].first);
+    }
+    return abs(area) / 2.0;
+}
+\end{lstlisting}
+
+\begin{theorem}[Pick 定理]
+设一个简单多边形的顶点均为整数坐标，且该多边形的面积为 $A$，内部的格点数为 $I$，边上的格点数为 $B$，则有：
+\[
+A = I + \frac{B}{2} - 1
+\]
+其中 $A$ 表示多边形面积，$I$ 表示多边形内部的格点数，$B$ 表示边上的格点数。
+\end{theorem}
+
+\begin{lstlisting}
+// Pick 定理的计算：给定顶点和边界点数，计算面积
+int pickTheorem(int I, int B) {
+    return I + B / 2 - 1;
+}
+\end{lstlisting}
+
+\begin{theorem}[二项式定理]
+对于任意实数 $x$ 和 $y$，以及非负整数 $n$，有：
+\[
+(x + y)^n = \sum_{k=0}^{n} \binom{n}{k} x^{n-k} y^k
+\]
+其中 $\binom{n}{k}$ 为二项式系数，表示为：
+\[
+\binom{n}{k} = \frac{n!}{k!(n-k)!}
+\]
+\end{theorem}
+
+\begin{theorem}[二项式反演]
+二项式反演的四种形式
+\begin{align}
+    g(n) = \sum_{i = 0}^{n} (-1)^i \binom{n}{i}f(i) \Longleftrightarrow f(n) = \sum_{i = 0}^{n} (-1)^i \binom{n}{i} g(i) \\
+    g(n) = \sum_{i = 0}^{n} \binom{n}{i} f(i) \Longleftrightarrow f(n) = \sum_{i = 0}^{n} (-1)^{n - i} \binom{n}{i} g(i) \\
+    g(n) = \sum_{i = n}^{N} (-1)^i \binom{i}{n}f(i) \Longleftrightarrow f(n) = \sum_{i = n}^{N} (-1)^i \binom{i}{n} g(i) \\
+    g(n) = \sum_{i = n}^{N} \binom{i}{n} f(i) \Longleftrightarrow f(n) = \sum_{i = n}^{N} (-1)^{i - n} \binom{i}{n} g(i)
+\end{align}
+
+\end{theorem}
+
+\begin{theorem}[卢卡斯定理]
+若 $p$ 为质数，$n$ 和 $k$ 为非负整数，则二项式系数 $\binom{n}{k} \pmod{p}$ 可以通过以下递归关系计算：
+\[
+\binom{n}{k} \equiv \prod_{i=0}^{m} \binom{n_i}{k_i} \pmod{p}
+\]
+其中，$n_i$ 和 $k_i$ 是 $n$ 和 $k$ 在基 $p$ 下的每一位的数值。
+\end{theorem}
+
+\begin{theorem}[卡特兰数]
+卡特兰公式：
+\begin{align}
+    f(n) = \binom{2n}{n} - \binom{2n}{n - 1} \tag{1}\\
+    f(n) = \binom{2n}{n} / (n + 1) \tag{2}\\
+    f(n) = f(n - 1) \ast (4n - 2) / (n + 1) \tag{3}\\
+    f(n) = \sum_{i = 0}^{n - 1} f(i) \ast f(n - 1 - i)\tag{4}
+\end{align}
+\end{theorem}

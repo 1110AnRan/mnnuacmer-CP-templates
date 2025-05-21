@@ -152,20 +152,20 @@ using i128 = __int128;
 using u128 = __uint128_t;
 using f32 = float;
 using f64 = double;
-using TII = tuple<int, int, int>;
+using TII = std::tuple<int, int, int>;
 const i64 mod = 1'000'000'007 /* 998'244'353 */;
-template <typename T> void sort(T& v) { sort(all(v)); }
-template <typename T> T sorted(T v) { return sort(v), v; }
-template <typename T> void rsort(T& v) { sort(rall(v)); }
-template <typename T, typename T2> void sort(T& v, T2 compare) { sort(all(v), compare); }
-template <typename T, typename T2> T sorted(T v, T2 compare) { return sort(v, compare), v; }
-template <typename T> void reverse(T& v) { reverse(all(v)); }
-template <typename T> T reversed(T v) { return reverse(v), v; }
-template <typename T> void unique(vector<T>& v) { v.erase(unique(all(v)), v.end()); }
-template <typename T> vector<T> uniqued(vector<T> v) { return unique(v), v; }
-template <typename T> T min(const vector<T> &v) { return *min_element(all(v)); }
-template <typename T> T max(const vector<T> &v) { return *max_element(all(v)); }
-template <typename T> T acc(const vector<T> &v) { return accumulate(v.begin(), v.end(), T(0LL)); }
+template <typename T> void sort(T& v) { std::sort(all(v)); }
+template <typename T> T sorted(T v) { return std::sort(v), v; }
+template <typename T> void rsort(T& v) { std::sort(rall(v)); }
+template <typename T, typename T2> void sort(T& v, T2 compare) { std::sort(all(v), compare); }
+template <typename T, typename T2> T sorted(T v, T2 compare) { return std::sort(v, compare), v; }
+template <typename T> void reverse(T& v) { std::reverse(all(v)); }
+template <typename T> T reversed(T v) { return std::reverse(v), v; }
+template <typename T> void unique(vector<T>& v) { v.erase(std::unique(all(v)), v.end()); }
+template <typename T> vector<T> uniqued(vector<T> v) { return std::unique(v), v; }
+template <typename T> T min(const vector<T> &v) { return *std::min_element(all(v)); }
+template <typename T> T max(const vector<T> &v) { return *std::max_element(all(v)); }
+template <typename T> T acc(const vector<T> &v) { return std::accumulate(v.begin(), v.end(), T(0LL)); }
 template <typename T> istream& operator>>(istream& is, std::vector<T>& v) { for(auto& x : v) { is >> x; } return is; }
 
 }

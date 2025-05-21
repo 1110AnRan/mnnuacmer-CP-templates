@@ -342,7 +342,7 @@ bool contain(const Line<T>& s) const {
 \subsection{钝角直角三角形计数问题}
 \begin{lstlisting}
 for(int k=0; k<n; ++k)  {
-    vector<Point<ll>> b;
+    std::vector<Point<ll>> b;
     b.reserve(n-1);
     for(int i=0; i<n; ++i) {
         if(a[i] == a[k]) continue;
@@ -393,10 +393,10 @@ T rotatingCalipers() const {
         Point<T> v = p[nxt(i)]-p[i];
         while(v.cross(p[nxt(j)]-p[i]) > v.cross(p[j]-p[i]))
             j=nxt(j);
-        ans = max({ans, p[i].interSquare(p[j]), 
+        ans = std::max({ans, p[i].interSquare(p[j]), 
                     p[nxt(i)].interSquare(p[j])});
         if(v.cross(p[nxt(j)]-p[i]) == v.cross(p[j]-p[i]))
-            ans = max({ans, p[i].interSquare(p[nxt(j)]), 
+            ans = std::max({ans, p[i].interSquare(p[nxt(j)]), 
                         p[nxt(i)].interSquare(p[nxt(j)])});
     }
     return ans;
@@ -405,14 +405,14 @@ T rotatingCalipers() const {
 // 旋转卡尺求最小面积矩形
 double minErea() const {
     if(p.size()<=2) return 0;
-    double ans = numeric_limits<double>::max();
+    double ans = std::numeric_limits<double>::max();
     for(int i=0, j=1, k=1, l=1; i<p.size(); ++i) {
         Point<T> v = p[nxt(i)]-p[i];
         while(v.cross(p[nxt(j)]-p[i]) > v.cross(p[j]-p[i])) j = nxt(j);
         while(v.dot(p[nxt(k)]-p[i]) > v.dot(p[k]-p[i])) k = nxt(k);
         if(!i) l = j;
         while(v.dot(p[nxt(l)]-p[i]) < v.dot(p[l]-p[i])) l = nxt(l);
-        ans = min(ans, 1. * v.cross(p[j]-p[i]) / v.square()
+        ans = std::min(ans, 1. * v.cross(p[j]-p[i]) / v.square()
                         * (v.dot(p[k]-p[i]) - v.dot(p[l]-p[i])));
     }
     return ans;
@@ -420,22 +420,22 @@ double minErea() const {
 // 旋转卡尺求最小宽度
 double minWidth() const {
     if(p.size()<=2) return 0;
-    double ans = numeric_limits<double>::max();
+    double ans = std::numeric_limits<double>::max();
     for(int i=0, j=1; i<p.size(); ++i) {
         Point<T> v = p[nxt(i)]-p[i];
         while(v.cross(p[nxt(j)]-p[i]) > v.cross(p[j]-p[i])) j = nxt(j);
-        ans = min(ans, v.cross(p[j]-p[i])/v.length());
+        ans = std::min(ans, v.cross(p[j]-p[i])/v.length());
     }
     return ans;
 }
 // 计算两个相离的凸包之间的最短距离，注意调用两次取min
 double distance(const Convex<double>& B) {
-    double ans = numeric_limits<double>::max();
+    double ans = std::numeric_limits<double>::max();
     for(int i=0,j=0; i<p.size(); ++i) {
         Point<double> v(p[nxt(i)]-p[i]);
         Line<double> s(p[i], p[nxt(i)]);
         if(i == 0) {
-            double mx = numeric_limits<double>::min();
+            double mx = std::numeric_limits<double>::min();
             for(int k=0; k<B.p.size(); ++k) {
                 double cro = v.cross(B.p[k]-p[i]);
                 if(sgn(cro-mx)>0) {
@@ -443,12 +443,12 @@ double distance(const Convex<double>& B) {
                     j = k;
                 }
             }
-            ans = min(ans, s.distanceSP(!j ? B.p.back(): B.p[j-1]));
+            ans = std::min(ans, s.distanceSP(!j ? B.p.back(): B.p[j-1]));
         }
-        ans = min(ans, s.distanceSP(B.p[j]));
+        ans = std::min(ans, s.distanceSP(B.p[j]));
         while(sgn(v.cross(B.p[B.nxt(j)]-p[i])-v.cross(B.p[j]-p[i])) >= 0) {
             j = B.nxt(j);
-            ans = min(ans, s.distanceSP(B.p[j]));
+            ans = std::min(ans, s.distanceSP(B.p[j]));
         }
     }
     return ans;
@@ -459,14 +459,14 @@ double distance(const Convex<double>& B) {
 \begin{lstlisting}
 // 求出的是最大/最小三角形面积的两倍
 template<class T>
-pair<T,T> minMaxTriangle(const vector<Point<T>>& a) {
+std::pair<T,T> minMaxTriangle(const std::vector<Point<T>>& a) {
     int n = a.size();
     T mn = numeric_limits<T>::max();
     T mx = 0;
-    using Node = tuple<int,int,Point<T>>;
-    vector<Node> all;
+    using Node = std::tuple<int,int,Point<T>>;
+    std::vector<Node> all;
     all.reserve(n*n);
-    vector<int> id(n), pos(n);
+    std::vector<int> id(n), pos(n);
     for(int i=0; i<n; ++i) {
         id[i] = i;
         for(int j=0; j<n; ++j) {
@@ -475,10 +475,10 @@ pair<T,T> minMaxTriangle(const vector<Point<T>>& a) {
             else all.emplace_back(i,j,a[j]-a[i]);
         }
     }
-    sort(all.begin(), all.end(), [&](const Node& x,const Node& y) {
+    std::sort(all.begin(), all.end(), [&](const Node& x,const Node& y) {
         return Point<T>::argcmp(get<2>(x), get<2>(y));
     });
-    sort(id.begin(), id.end(), [&](const int& i,const int& j) {
+    std::sort(id.begin(), id.end(), [&](const int& i,const int& j) {
         return a[i].y < a[j].y or a[i].y==a[j].y and a[i].x>a[j].x;
     });
     for(int i=0; i<n; ++i)
@@ -486,13 +486,13 @@ pair<T,T> minMaxTriangle(const vector<Point<T>>& a) {
     for(auto [i,j,v]:all) {
         // 如果没有三点共线 assert(pos[i] = pos[j] + 1);
         if(pos[i] > pos[j]) {
-            swap(id[pos[i]], id[pos[j]]);
-            swap(pos[i], pos[j]);
+            std::swap(id[pos[i]], id[pos[j]]);
+            std::swap(pos[i], pos[j]);
         }
-        int t = max(pos[i],pos[j])+1;
+        int t = std::max(pos[i],pos[j])+1;
         if(t<n) {
-            mn = min(mn, (a[id[t]]-a[i]).cross(v));
-            mx = max(mx, (a[id.back()]-a[i]).cross(v));
+            mn = std::min(mn, (a[id[t]]-a[i]).cross(v));
+            mx = std::max(mx, (a[id.back()]-a[i]).cross(v));
         }
     }
     return {mn, mx};
@@ -505,7 +505,7 @@ template<class T>
 struct DynamicConvex {
     /// @note operator< 使用极角序，并考虑极径
     Point<T> o;
-    set<Point<T>> s; // 坐标扩大三倍，使得三角形中心为整数
+    std::set<Point<T>> s; // 坐标扩大三倍，使得三角形中心为整数
     using Iter = decltype(s.begin());
     auto nxt(Iter it) const {
         return next(it) == s.end() ? s.begin() : next(it);
@@ -553,7 +553,7 @@ struct DynamicConvex {
     }
 
     double D;// 周长
-    map<Point<T>, Iter> edge;
+    std::map<Point<T>, Iter> edge;
     void addEdge(Iter it, Iter nit) {// s.size()>=3 时维护信息
         D += it->distance(*nit);
         edge[*nit - *it] = it;
@@ -563,7 +563,7 @@ struct DynamicConvex {
         edge.erase(*nit - *it);
     }
     /// @note 调用前注意直线 ax+by=c 的坐标扩大三倍 ax+by=3c
-    array<Point<T>, 2> extremeByLine(Point<T> const& v) const {
+    std::array<Point<T>, 2> extremeByLine(Point<T> const& v) const {
         assert(s.size() > 2);
         auto get = [&](Point<T> const& v) {
             auto it = edge.lower_bound(v);
@@ -583,10 +583,10 @@ Convex<T> MinkowskiSum(Convex<T> const& A, Convex<T> const& B) {
     auto cmp = [&](Point<T> const& a, Point<T> const& b) {
         return a.y > b.y or a.y == b.y and a.x < b.x;
     };
-    int a = min_element(A.p.begin(), A.p.begin() + A.n, cmp) - A.p.begin();
-    int b = min_element(B.p.begin(), B.p.begin() + B.n, cmp) - B.p.begin();
+    int a = std::min_element(A.p.begin(), A.p.begin() + A.n, cmp) - A.p.begin();
+    int b = std::min_element(B.p.begin(), B.p.begin() + B.n, cmp) - B.p.begin();
     Point<T> s(A.p[a] + B.p[b]);
-    vector<Point<T>> ps(1, s);
+    std::vector<Point<T>> ps(1, s);
     auto popC = [&](Point<T> const& e, Point<T> const& f) {
         return (e - f).toLeft(s - e) == 0 and sgn((e - f).dot(s - e)) >= 0;
     };
@@ -607,7 +607,7 @@ Convex<T> MinkowskiSum(Convex<T> const& A, Convex<T> const& B) {
 \subsection{半平面交}
 \begin{lstlisting}
 template<class T>
-vector<Line<T>> hp(vector<Line<T>> vs, T inf = T(1e9)) {
+std::vector<Line<T>> hp(std::vector<Line<T>> vs, T inf = T(1e9)) {
     vs.emplace_back(Point<T>(inf, -inf), Point<T>(inf, inf));
     vs.emplace_back(Point<T>(inf, inf), Point<T>(-inf, inf));
     vs.emplace_back(Point<T>(-inf, inf), Point<T>(-inf, -inf));
@@ -615,7 +615,7 @@ vector<Line<T>> hp(vector<Line<T>> vs, T inf = T(1e9)) {
     auto sameDir = [&](Line<T> const& a, Line<T> const& b) {
         return a.parallel(b) and sgn(a.vec().dot(b.vec())) >= 0;
     };
-    sort(vs.begin(), vs.end(), [&](Line<T> const& a, Line<T> const& b) {
+    std::sort(vs.begin(), vs.end(), [&](Line<T> const& a, Line<T> const& b) {
         if(sameDir(a, b)) return a.toLeft(b.a) == -1;
         return Point<T>::argcmp(a.vec(), b.vec());
     });
@@ -627,7 +627,7 @@ vector<Line<T>> hp(vector<Line<T>> vs, T inf = T(1e9)) {
         }
         return Point<double>(a.vec()).toLeft(b.lineIntersection(c) - Point<double>(a.a)) < 0;
     };
-    deque<Line<T>> q;
+    std::deque<Line<T>> q;
     for(auto& v : vs) {
         if(q.size() and sameDir(q.back(), v)) continue;
         while(q.size() > 1 and canPop(v, q.back(), q[q.size() - 2])) q.pop_back();
@@ -637,6 +637,6 @@ vector<Line<T>> hp(vector<Line<T>> vs, T inf = T(1e9)) {
     }
     while(q.size() > 1 and canPop(q[0], q.back(), q[q.size() - 2])) q.pop_back();
     while(q.size() > 1 and canPop(q.back(), q[0], q[1])) q.pop_front();
-    return vector<Line<T>>(q.begin(), q.end());
+    return std::vector<Line<T>>(q.begin(), q.end());
 }
 \end{lstlisting}

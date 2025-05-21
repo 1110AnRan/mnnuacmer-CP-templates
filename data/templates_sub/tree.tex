@@ -209,7 +209,7 @@ struct DescartesTree {
 		work(v);
 	}
 
-	void work(const std::vector<T>& v) {
+	int work(const std::vector<T>& v) {
 		int n = v.size();
 		lch.resize(n, n);
 		rch.resize(n, n);
@@ -226,6 +226,7 @@ struct DescartesTree {
 			stk.pop_back();
 			rch[stk.back()] = x;
 		}
+        return stk.back();
 	}
 };
 \end{lstlisting}

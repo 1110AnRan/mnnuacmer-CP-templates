@@ -1,0 +1,218 @@
+\section{常见模型}
+
+\subsection{子数组最大累加和}
+\begin{lstlisting}
+// index-base 0
+// nums数组 该数组里面每个数的值
+std::vector<int> dp(n);
+dp[0] = nums[0];
+for(int i = 1; i < n; i++) {
+    dp[i] = std::max(nums[i], dp[i - 1] + nums[i]);
+}
+std::cout << *std::max_element(dp.begin(), dp.end());
+\end{lstlisting}
+
+\subsection{最长递增子序列}
+
+\begin{lstlisting}
+// index-base 0
+// nums数组 该序列的每个数
+// len 最长长度
+auto binarysearch = [](std::vector<int>& ends, int len, int num) -> int {
+    int l = 0, r = len - 1, m, ans = -1;
+    while(l <= r) {
+        m = (l + r) >> 1;
+        if(ends[m] >= num) {
+            ans = m;
+            r = m - 1;
+        } else {
+            l = m + 1;
+        }
+    }
+    return ans;
+};
+
+auto get = [&]() -> int {
+    std::vector<int> ends(n);
+    int len = 0;
+    for(int i = 0, find; i < n; i++) {
+        find = binarysearch(ends, len, nums[i]);
+        if(find == -1) {
+            ends[len++] = nums[i];
+        } else {
+            ends[find] = nums[i];
+        }
+    }
+    return len;
+};
+\end{lstlisting}
+
+\subsection{最长不下降子序列}
+\begin{lstlisting}
+// index-base 0
+// nums数组 该序列的每个数
+// len 最长长度
+auto binarysearch = [](std::vector<int>& ends, int len, int num) -> int {
+    int l = 0, r = len - 1, m, ans = -1;
+    while(l <= r) {
+        m = (l + r) >> 1;
+        if(ends[m] > num) {
+            ans = m;
+            r = m - 1;
+        } else {
+            l = m + 1;
+        }
+    }
+    return ans;
+};
+
+auto get = [&]() -> int {
+    std::vector<int> ends(n);
+    int len = 0;
+    for(int i = 0, find; i < n; i++) {
+        find = binarysearch(ends, len, nums[i]);
+        if(find == -1) {
+            ends[len++] = nums[i];
+        } else {
+            ends[find] = nums[i];
+        }
+    }
+    return len;
+};
+\end{lstlisting}
+
+\subsection{01背包}
+\subsubsection{无空间优化}
+\begin{lstlisting}
+// index-base 1
+// n 物品编号
+// t 最大容量
+// cost数组 每个物品的容量
+// val数组 每个物品的价值
+std::vector<std::vector<int>> dp(n + 1, std::vector<int>(t + 1));
+for(int i = 1; i <= n; i++) {
+    for(int j = 0; j <= t; j++) {
+        dp[i][j] = dp[i - 1][j];
+        if(j - cost[i] >= 0) {
+            dp[i][j] = std::max(dp[i][j], dp[i - 1][j - cost[i]] + val[i]);
+        }
+    }
+}
+std::cout << dp[n][t];
+\end{lstlisting}
+
+\subsubsection{空间优化}
+\begin{lstlisting}
+// index-base 1
+std::vector<int> dp(t + 1);
+for(int i = 1; i <= n; i++) {
+    for(int j = t; j >= cost[i]; j--) {
+        dp[j] = std::max(dp[j], dp[j - cost[i]] + val[i]); 
+    }
+}
+std::cout << dp[t];
+\end{lstlisting}
+
+\subsection{分组背包}
+
+\subsubsection{无空间优化}
+\begin{lstlisting}
+// index-base 1
+// m 物品总重量
+// n 物品数量
+// arr[i][0] i号物品的体积
+// arr[i][1] i号物品的价值
+// arr[i][2] i号物品的组号
+// teams 物品组数
+int m, n;
+std::cin >> m >> n;
+std::vector<std::array<int, 3>> nums(n + 1);
+for(int i = 1; i <= n; i++) {
+    std::cin >> nums[i][0] >> nums[i][1] >> nums[i][2];
+}
+std::sort(nums.begin() + 1, nums.end(), [](std::array<int, 3> a1, std::array<int, 3> a2) {
+    return a1[2] >= a2[2];
+});
+
+int teams = 1;
+for(int i = 2; i <= n; i++) {
+    if(nums[i - 1][2] != nums[i][2]) {
+        teams++;
+    }
+}
+std::vector<std::vector<int>> dp(teams + 1, std::vector<int>(m + 1));
+for(int start = 1, end = 2, i = 1; start <= n; i++) {
+    while(end <= n && nums[end][2] == nums[start][2]) {
+        end++;
+    }
+    for(int j = 0; j <= m; j++) {
+        dp[i][j] = dp[i - 1][j];
+        for(int k = start; k < end; k++) {
+            if(j - nums[k][0] >= 0) {
+                dp[i][j] = std::max(dp[i][j], dp[i - 1][j - nums[k][0]] + nums[k][1]);
+            }
+        }
+    }
+    start = end++;
+}
+std::cout << dp[teams][m];
+\end{lstlisting}
+
+\subsubsection{空间优化}
+\begin{lstlisting}
+// index-base 1
+std::vector<int> dp(m + 1);
+for(int start = 1, end = 2; start <= n;) {
+    while(end <= n and nums[end][2] == nums[start][2]) {
+        end++;
+    }
+    for(int j = m; j >= 0; j--) {
+        for(int k = start; k < end; k++) {
+            if(j - nums[k][0] >= 0) {
+                dp[j] = std::max(dp[j], nums[k][1] + dp[j - nums[k][0]]);
+            }
+        }
+    }
+    start = end++;
+}
+std::cout << dp[m];
+\end{lstlisting}
+
+\subsection{完全背包}
+
+\subsubsection{无空间优化}
+\begin{lstlisting}
+// index-base 1
+// t 背包总容量
+// m 物品个数
+// cost数组 每个物品的容量
+// val数组 每个物品的价值
+int t, m;
+std::cin >> t >> m;
+std::vector<int> cost(m + 1), val(m + 1);
+for(int i = 1; i <= m; i++) {
+    std::cin >> cost[i] >> val[i];
+}
+std::vector<std::vector<long long>> dp(m + 1, std::vector<long long>(t + 1));
+for(int i = 1; i <= m; i++) {
+    for(int j = 0; j <= t; j++) {
+        dp[i][j] = dp[i - 1][j];
+        if(j - cost[i] >= 0) {
+            dp[i][j] = std::max(dp[i][j], dp[i][j - cost[i]] + val[i]);
+        }
+    }
+}
+std::cout << dp[m][t];
+\end{lstlisting}
+
+\subsubsection{空间优化}
+\begin{lstlisting}
+// index-base 1
+std::vector<long long> dp(t + 1);
+for(int i = 1; i <= m; i++) {
+    for(int j = cost[i]; j <= t; j++) {
+        dp[j] = std::max(dp[j], dp[j - cost[i]] + val[i]);
+    }
+}
+std::cout << dp[t];
+\end{lstlisting}

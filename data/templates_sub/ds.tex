@@ -226,25 +226,27 @@ struct Fenwick {
 struct BIT_2D {
     using T = long long;
     int n, m;
-    vector<vector<T>> sum[4];
-    BIT_2D(int _n, int _m):n(_n), m(_m) {
-        for (int i=0; i<4; ++i) sum[i].assign(n+1, vector<T>(m+1, 0));
+    std::vector<std::vector<T>> sum[4];
+    BIT_2D(int _n, int _m): n(_n), m(_m) {
+        for (int i= 0; i < 4; ++i) {
+            sum[i].assign(n+1, std::vector<T>(m+1, 0));
+        }
     }
     void add(int x, int y, T val) {
-        for (int i=x; i<=n; i+=i&-i) {
-            for (int j=y; j<=m; j+=j&-j) {
-                sum[0][i][j]+=val;
-                sum[1][i][j]+=val*x;
-                sum[2][i][j]+=val*y;
-                sum[3][i][j]+=val*x*y;
+        for (int i = x; i <= n; i += i&-i) {
+            for (int j = y; j <= m; j += j&-j) {
+                sum[0][i][j] += val;
+                sum[1][i][j] += val*x;
+                sum[2][i][j] += val*y;
+                sum[3][i][j] += val*x*y;
             }
         }
     }
     void range_add(int x1, int y1, int x2, int y2, T x) {
         add(x1, y1, x);
-        add(x1, y2+1, -x);
-        add(x2+1, y1, -x);
-        add(x2+1, y2+1, x);
+        add(x1, y2 + 1, -x);
+        add(x2 + 1, y1, -x);
+        add(x2 + 1, y2 + 1, x);
     }
     T ask(int x, int y) {
         T res[4]= {};
@@ -252,10 +254,10 @@ struct BIT_2D {
             for (int j=y; j>0; j-=j&-j)
                 for (int k=0; k<4; ++k)
                     res[k]+=sum[k][i][j];
-        return (x+1)*(y+1)*res[0]-(y+1)*res[1]-(x+1)*res[2]+res[3];
+        return (x + 1) * (y + 1) * res[0]-(y + 1) * res[1]-(x + 1) * res[2] + res[3];
     }
     T range_ask(int x1, int y1, int x2, int y2) {
-        return ask(x2, y2)-ask(x1-1, y2)-ask(x2, y1-1)+ask(x1-1, y1-1);
+        return ask(x2, y2) - ask(x1 - 1, y2)- ask(x2, y1 - 1) + ask(x1 - 1, y1 - 1);
     }
 };
 \end{lstlisting}
@@ -571,6 +573,40 @@ private:
     T op(const T& lv, const T& rv) const {
         return std::max(lv, rv);
     }
+};
+\end{lstlisting}
+
+\subsection{线性基}
+\begin{lstlisting}
+struct Basis {
+    static const int BIT = 21;
+    std::vector<int> basis;
+
+    Basis() {
+        basis.assign(BIT + 1, 0);
+    }
+
+    bool insert(int num) {
+        for(int i = BIT; i >= 0; i--) {
+            if(num >> i == 1) {
+                if(basis[i] == 0) {
+                    basis[i] = num;
+                    return true;
+                }
+                num ^= basis[i];
+            }
+        }
+        return false;
+    }
+
+    int max() {
+        int ans = 0;
+        for(int i = BIT; i>= 0; i--) {
+            ans = std::max(ans, ans ^ basis[i]);
+        }
+        return ans;
+    }
+
 };
 \end{lstlisting}
 
