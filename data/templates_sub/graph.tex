@@ -5,6 +5,7 @@ const int N = 2e6 + 10;
 struct Enode {
     int next, to, w;
 }edges[N];
+// 如果是双向图，那么edges中的N为 N << 1;
 int head[N], cnt = 0;
 
 void init() {
@@ -74,9 +75,7 @@ struct Dijkstra {   // index-base-0
             for(auto [v, w] : adj[u]) {
                 if(dis[v] > dis[u] + w) {
                     dis[v] = dis[u] + w;
-                    if(!vis[v]) {
-                        q.push((node){dis[v], v});
-                    }
+                    q.push((node){dis[v], v});
                 }
             }
         }
