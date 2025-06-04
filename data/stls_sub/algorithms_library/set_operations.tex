@@ -1,6 +1,9 @@
 \subsubsection{集合操作（在已排序范围上）}
-\begin{enumerate}
-    \item $iterator\ set\_union(first1, \ last1,\ first2,\ last2,\ bid)$，将范围1和范围2中的元素取并集放在$dest$容器中；
-    \item $iterator\ set\_intersection(first1,\ last1,\ first2,\ lats2,\ bid)$，将范围1和范围2中的元素取交集放在$dest$容器中；
-    \item $iterator\ set\_difference(first1,\ last1,\ first2,\ lats2,\ bid)$，将范围1和范围2中的元素取差集放在$dest$容器中；
-\end{enumerate}
+\begin{lstlisting}
+// 将范围1和范围2中的元素取并集放在dest容器中
+iterator set_union(first1,last1,first2,last2,bid)
+// 将范围1和范围2中的元素取交集放在dest容器中
+iterator set_intersection(first1,last1,first2,lats2,bid)
+// 将范围1和范围2中的元素取差集放在dest容器中
+iterator set_difference(first1,last1,first2,lats2,bid)
+\end{lstlisting}

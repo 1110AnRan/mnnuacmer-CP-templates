@@ -1,11 +1,19 @@
 \subsubsection{搜索操作}
-\begin{enumerate}
-    \item $bool\ all\_of(first,\ last,\ compare)$，判断区间的数是否全符合$compare$；
-    \item $bool\ any\_of(first,\ last,\ compare)$，判断区间的数是否存在一个$compare$；
-    \item $bool\ none\_of(first,\ last,\ compare)$，判断区间的数是否都不符合$compare$；
-    \item $iterator\ find(first,\ last,\ val\_a)$，返回区间中第一个等于$val\_a$的位置，否则返回$last$；
-    \item $iterator\ find\_if(first,\ last,\ compare)$，返回区间中第一个满足$compare$的位置，否则返回$last$；
-    \item $iterator\ find\_if\_not(first,\ last,\ compare)$，返回区间中第一个不满足$compare$的位置，否则返回$last$；
-    \item $size\_t\ count(first,\ last,\ val\_a)$，返回区间中等于$val\_a$的个数；
-    \item $size\_t\ count\_if(first,\ last,\ compare)$，返回区间中满足$compare$的个数；
-\end{enumerate}
+\begin{lstlisting}
+// 判断区间的数是否全符合compare
+bool all_of(first,last,compare)
+// 判断区间的数是否存在符合compare
+bool any_of(first,last,compare)
+// 判断区间的数是否都不符合compare
+bool none_of(first,last,compare)
+// 返回区间中第一个等于val_a的位置,否则返回last
+iterator find(first,last,val_a)
+// 返回区间中第一个满足compare的位置,否则返回last
+iterator find_if(first,last,compare)
+// 返回区间中第一个不满足compare的位置,否则返回last
+iterator find_if_not(first,last,compare)
+// 返回区间中等于val_a的个数
+size_t count(first,last,val_a)
+// 返回区间中满足compare的个数
+size_t count_if(first,last,compare)
+\end{lstlisting}

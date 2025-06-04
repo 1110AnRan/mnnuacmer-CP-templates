@@ -49,13 +49,13 @@ int modInverse(int a, int m) {
 如果 $ax + by = d \quad d$ 为 $\gcd(a, b)$，其中一个特解是 $(x_0, y_0)$ \\
 则通解为：
 \[
-x = x_0 + (b / d) \ast n \qquad y = y_0 - (a / d) \ast n \quad n \in \mathbb{Z}
+x = x_0 + \frac{b}{d} \ast n \qquad y = y_0 - \frac{a}{d} \ast n \quad n \in \mathbb{Z}
 \]
 如果 $ax + by = c \quad c$ 为 $d$ 的整数倍，根据上面的特解，可以得到该等式的一个特解 $(x_0', y_0')$ \\
-其中 $x_0' = x_0 \ast (c / d) \quad y_0' = y_0 \ast (c / d)$ \\
+其中 $x_0' = x_0 \ast \frac{c}{d} \quad y_0' = y_0 \ast \frac{c}{d}$ \\
 则通解为：
 \[
-x = x_0' + (b / d) \ast n \quad y = y_0' - (a / d) \ast n \quad n \in \mathbb{Z}
+x = x_0' + \frac{b}{d} \ast n \quad y = y_0' - \frac{a}{d} \ast n \quad n \in \mathbb{Z}
 \]
 \end{theorem}
 \begin{lstlisting}
@@ -232,8 +232,8 @@ int pickTheorem(int I, int B) {
 卡特兰公式：
 \begin{align}
     f(n) = \binom{2n}{n} - \binom{2n}{n - 1} \tag{1}\\
-    f(n) = \binom{2n}{n} / (n + 1) \tag{2}\\
-    f(n) = f(n - 1) \ast (4n - 2) / (n + 1) \tag{3}\\
+    f(n) = \frac{\binom{2n}{n}}{(n + 1)}  \tag{2}\\
+    f(n) = f(n - 1) \ast \frac{4n - 2}{n + 1}  \tag{3}\\
     f(n) = \sum_{i = 0}^{n - 1} f(i) \ast f(n - 1 - i)\tag{4}
 \end{align}
 \end{theorem}

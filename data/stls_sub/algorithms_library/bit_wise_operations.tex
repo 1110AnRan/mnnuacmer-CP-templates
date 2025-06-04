@@ -1,0 +1,11 @@
+\subsubsection{位运算操作}
+\begin{lstlisting}
+// 返回x二进制下含1的数量,例如x=15=(1111)时答案为4
+__builtin_popcount(x)
+// 返回x右数第一个1的位置(1-idx), 1(1) 返回1, 8(1000) 返回4, 26(11010)返回2
+__builtin_ffs(x)
+// 返回x二进制下后导0的个数, 1(1) 返回0, 8(1000) 返回3
+__builtin_ctz(x)
+// 返回x二进制下的位数, 9(1001) 返回4, 26(11010) 返回5
+bit_width(x)  
+\end{lstlisting}

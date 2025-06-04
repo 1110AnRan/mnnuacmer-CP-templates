@@ -808,3 +808,183 @@ std::vector<i64> factorize(i64 n) {
     return p;
 }
 \end{lstlisting}
+
+\subsection{矩阵}
+\begin{lstlisting}
+struct Matrix {
+    int n, m, mod;
+    bool ok;
+    std::vector<std::vector<i64>> a;
+ 
+    void clear() {
+        a.assign(n + 1, std::vector<i64>(m + 1, 0)); 
+    }
+    Matrix() : n(0), m(0), ok(false) {
+        clear();
+    }
+    Matrix(int _n) : n(_n), m(_n), ok(false) {
+        clear();
+    }
+    Matrix(int _n, int _m) : n(_n), m(_m), ok(false) {
+        clear();
+    }
+
+    void setMod(int _m) {
+        mod = _m;
+    }
+ 
+    void init() {
+        clear();
+        for (int i = 1; i <= n; i++) {
+            a[i][i] = 1;
+        }
+    }
+    void reset(int _n = 0, int _m = 0) {
+        n = _n, m = _m;
+        if (m == 0) {
+            m = n;
+        }
+        clear();
+    }
+ 
+    Matrix operator+(const Matrix &b) const {
+        Matrix res(n, m);
+        for (int i = 1; i <= res.n; i++) {
+            for (int j = 1; j <= res.m; j++) {
+                res.a[i][j] = (a[i][j] + b.a[i][j]) % mod;
+            }
+        }
+        return res;
+    }
+    Matrix operator-(const Matrix &b) const {
+        Matrix res(n, m);
+        for (int i = 1; i <= res.n; i++) {
+            for (int j = 1; j <= res.m; j++) {
+                res.a[i][j] = (((a[i][j] - b.a[i][j]) % mod) + mod) % mod;
+            }
+        }
+        return res;
+    }
+    Matrix operator*(const Matrix &b) const {
+        Matrix res(n, b.m);
+        for (int i = 1; i <= res.n; i++) {
+            for (int j = 1; j <= res.m; j++) {
+                for (int k = 1; k <= m; k++) {
+                    res.a[i][j] = (res.a[i][j] + a[i][k] * b.a[k][j]) % mod;
+                }
+            }
+        }
+        return res;
+    }
+    Matrix operator/(Matrix b) const {
+        auto c = b.getinv();
+        assert(c.ok);
+        return *this * c;
+    }
+    Matrix operator^(i64 x) const {
+        Matrix res(n, n), a = *this;
+        res.init();
+        while (x) {
+            if (x & 1) {
+                res = res * a;
+            }
+            a = a * a;
+            x >>= 1;
+        }
+        return res;
+    }
+    Matrix operator+=(const Matrix &b) { return *this + b; }
+    Matrix operator-=(const Matrix &b) { return *this - b; }
+    Matrix operator*=(const Matrix &b) { return *this * b; }
+    Matrix operator/=(const Matrix &b) { return *this / b; }
+ 
+    i64 qpow(i64 a, i64 n) {
+        i64 res = 1;
+        while (n) {
+            if (n & 1) {
+                res = res * a % mod;
+            }
+            a = a * a % mod;
+            n >>= 1;
+        }
+        return res;
+    }
+ 
+    Matrix getinv() // 方阵求逆
+    {
+        if (n != m) {
+            Matrix res;
+            res.ok = 0;
+            return res;
+        }
+        Matrix c = *this;
+        c.m = 2 * n;
+        for (int i = 1; i <= n; i++) { // 算增广矩阵的时候要开两倍空间，不然会出问题
+            c.a[i].resize(2 * n + 1, 0);
+            c.a[i][i + n] = 1;
+        }
+        for (int i = 1; i <= n; i++) {
+            int pos = i;
+            for (int j = i + 1; j <= n; j++) {
+                if (abs(c.a[j][i]) > abs(c.a[pos][i])) {
+                    pos = j;
+                }
+            }
+            if (i != pos) {
+                swap(c.a[i], c.a[pos]);
+            }
+            if (!c.a[i][i]) {
+                // puts("No Solution");
+                Matrix res;
+                res.ok = 0;
+                return res;
+            }
+            i64 inv = qpow(c.a[i][i], mod - 2);
+            for (int j = 1; j <= n; j++) {
+                if (j != i) {
+                    i64 mul = c.a[j][i] * inv % mod;
+                    for (int k = i; k <= 2 * n; k++) {
+                        c.a[j][k] = ((c.a[j][k] - c.a[i][k] * mul) % mod + mod) % mod;
+                    }
+                }
+            }
+            for (int j = 1; j <= 2 * n; j++) {
+                c.a[i][j] = c.a[i][j] * inv % mod;
+            }
+        }
+        // 增广矩阵
+        // Matrix res(n, 2 * n);
+        // res.ok = 1;
+        // for (int i = 1; i <= n; i++)
+        //     for (int j = 1; j <= 2 * n; j++)
+        //         res.a[i][j] = c.a[i][n + j];
+        // return res;
+        Matrix res(n, n);
+        res.ok = 1;
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= n; j++) {
+                res.a[i][j] = c.a[i][n + j];
+            }
+        }
+        return res;
+    }
+ 
+    friend constexpr auto &operator>>(istream &in, Matrix &a) {
+        for (int i = 1; i <= a.n; i++) {
+            for (int j = 1; j <= a.m; j++) {
+                in >> a.a[i][j];
+            }
+        }
+        return in;
+    }
+    friend constexpr auto &operator<<(ostream &out, const Matrix &a) {
+        for (int i = 1; i <= a.n; i++) {
+            for (int j = 1; j <= a.m; j++) {
+                out << a.a[i][j] << ' ';
+            }
+            cout << endl;
+        }
+        return out;
+    }
+};
+\end{lstlisting}
