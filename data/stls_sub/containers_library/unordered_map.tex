@@ -1,0 +1,41 @@
+\subsubsection{unordered\_map}
+\begin{center}
+\begin{tabular}{| c | c | c |}
+\hline
+\multicolumn{3}{| c |}{C++ unordered\_map 关键特性总结} \\
+\hline
+常用函数/方法 & 时间复杂度 & 说明 \\
+\hline
+insert({const K\& key, const V\& value}) & \multirow{7}{*}{O(n)} & 插入元素 \\
+operator[](key) = value & & 键不存在时插入默认值 \\
+erase(const K\& key) & & 删除key元素 \\
+find(const K\& key) & & 返回迭代器或 end() \\
+reserve(size\_t n) & & 预留空间 \\
+count(const K\& key) & & 元素计数 \\
+clear() & & 清空容器 \\
+\hline
+\end{tabular}
+\end{center}
+\begin{lstlisting}
+// 初始化
+std::unordered_map<std::string, int> umap = {
+    {"apple", 5}, {"banana", 3}
+};
+
+// 插入元素
+umap.insert({"orange", 8});    // 方式1
+umap["mango"] = 6;             // 方式2（可覆盖）
+
+// 访问元素
+int val1 = umap.at("apple");   // 安全访问（异常）
+int val2 = umap["banana"];     // 不安全（不存在时插入0）
+
+// 删除元素
+umap.erase("mango");           // 删除键
+
+// 查找元素
+auto it = umap.find("orange");
+if (it != umap.end()) {
+    it->second = 10;           // 修改值（键不可修改）
+}
+\end{lstlisting}

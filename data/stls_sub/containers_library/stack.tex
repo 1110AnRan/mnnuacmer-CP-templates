@@ -1,0 +1,87 @@
+\subsubsection{stack}
+\begin{center}
+\begin{tabular}{| c | c | c |}
+\hline
+\multicolumn{3}{| c |}{C++ stack 关键特性总结} \\
+\hline
+常用函数/方法 & 时间复杂度 & 说明 \\
+\hline
+push(const T\& val) & \multirow{5}{*}{O(1)} & 在栈顶插入元素 \\
+pop() & & 移除栈顶元素 \\
+top() & & 访问栈顶元素 \\
+empty() & & 检查栈是否为空 \\
+size() & & 返回栈中元素数量 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{lstlisting}
+// 1. 创建stack的不同方式
+std::stack<int> s1; // 默认使用deque作为底层容器
+
+// 2. 基本操作
+// 压入元素
+s1.push(10);
+s1.push(20);
+s1.push(30);
+s1.emplace(40); // C++11 直接构造元素，避免复制
+
+// 访问栈顶元素
+// 40
+std::cout << "栈顶元素: " << s1.top() << std::endl; // 40
+
+// 弹出元素
+s1.pop(); // 移除40
+// 30
+std::cout << "弹出后栈顶元素: " << s1.top() << std::endl; // 30
+
+// 3. 容量查询
+// 否
+std::cout << "栈是否为空: " << (s1.empty() ? "是" : "否") << std::endl;
+// 3
+std::cout << "栈的大小: " << s1.size() << std::endl;
+
+// 4. 栈的交换
+std::stack<int> s2;
+s2.push(100);
+s2.push(200);
+
+std::cout << "\n交换前:";
+// 3
+std::cout << "\ns1 大小: " << s1.size();
+// 2
+std::cout << "\ns2 大小: " << s2.size();
+
+s1.swap(s2); // C++03 方式
+// std::swap(s1, s2); // C++11 也可用此方式
+
+std::cout << "\n\n交换后:";
+// 2
+std::cout << "\ns1 大小: " << s1.size();
+// 3
+std::cout << "\ns2 大小: " << s2.size();
+// 200
+std::cout << "\ns1 栈顶: " << s1.top() << std::endl; // 200
+
+// 5. 清空栈
+// 200 100
+std::cout << "\n清空栈: ";
+while (!s1.empty()) {
+    std::cout << s1.top() << " ";
+    s1.pop();
+}
+// 0
+std::cout << "\n清空后大小: " << s1.size() << std::endl;
+// 6. 注意事项
+std::stack<int> s3;
+// 危险操作：空栈时访问top()会导致未定义行为
+// std::cout << s6.top(); // 崩溃!
+
+// 安全访问方式
+if (!s3.empty()) {
+    std::cout << "栈顶: " << s3.top() << std::endl;
+}
+else {
+    std::cout << "\n警告：尝试访问空栈！" << std::endl;
+}
+\end{lstlisting}

@@ -1,0 +1,82 @@
+\subsubsection{set\_multiset}
+\begin{center}
+\begin{tabular}{| c | c | c |}
+\hline
+\multicolumn{3}{| c |}{C++ set\_multiset 关键特性总结} \\
+\hline
+常用函数/方法 & 时间复杂度 & 说明 \\
+\hline
+insert(const K\& key) & \multirow{9}{*}{O(log n)} & 键存在时插入失败 \\
+erase(const K\& key) & & 删除指定键 \\
+find(const K\& key) & & 查找元素，返回迭代器或end() \\
+count(const K\& key) & & 	返回1（存在）或0（不存在）\\
+lower\_bound(const K\& key) & & 首个 $>=$ key 的元素 \\
+upper\_bound(const K\& key) & & 首个 $>$ key 的元素 \\
+equal\_range(const K\& key) & & 返回单元素的迭代器范围 \\
+extract(const K\& key) & & 安全转移元素 \\
+contains(const K\& key) & & 判断是否存在key(set中无此函数) \\
+\hline
+empty() & \multirow{3}{*}{O(1)} & 判断是否为空 \\
+size() & & 返回元素数量 \\
+clear() & & 清空 \\
+\hline
+\end{tabular}
+\end{center}
+\begin{lstlisting}
+std::set<int> s1;
+
+s1.insert(1);
+s1.insert(2);
+s1.insert(3);
+s1.insert(1);
+
+
+// 1 2 3
+for(auto x : s1) {
+    std::cout << x << " ";
+}
+std::cout << std::endl;
+
+
+// 1 is in s1
+// 2 is in s1
+// 4 is not in s1
+for(auto x : {1, 2, 4}) {
+    if(s1.find(x) != s1.end()) {
+        std::cout << x << " is in s1" << std::endl;
+    } else {
+        std::cout << x << " is not in s1" << std::endl;
+    }
+}
+
+s1.erase(1);
+// 2 3
+for(auto x : s1) {
+    std::cout << x << " ";
+}
+std::cout << std::endl;
+
+// 3
+auto it = s1.lower_bound(3);
+if(it != s1.end()) {
+    std::cout << *it << std::endl;
+} else {
+    std::cout << "greater then 3 is not in s1" << std::endl;
+}
+
+// greater 3 is not in s1
+it = s1.upper_bound(3);
+if(it != s1.end()) {
+    std::cout << *it << std::endl;
+} else {
+    std::cout << "greater 3 is not in s1" << std::endl;
+}
+
+
+// 2 is in s1
+if(s1.count(2)) {
+    std::cout << "2 is in s1" << std::endl;
+} else {
+    std::cout << "2 is not in s1" << std::endl;
+}
+\end{lstlisting}

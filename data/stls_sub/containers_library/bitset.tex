@@ -1,0 +1,78 @@
+\subsubsection{bitset}
+\begin{center}
+\begin{tabular}{| c | c | c |}
+\hline
+\multicolumn{3}{| c |}{C++ bitset 关键特性总结} \\
+\hline
+常用函数/方法 & 时间复杂度 & 说明 \\
+\hline
+set() & \multirow{3}{*}{O(n)} & 设置所有位为1 \\
+reset() & & 设置所有位为0 \\
+flip() & & 翻转所有位 \\
+\hline
+set(size\_t pos) & \multirow{3}{*}{O(1)} & 设置pos位为1 \\ 
+reset(size\_t pos) & & 设置pos位为0 \\
+flip(size\_t pos) & & 翻转第pos位 \\
+\hline
+any() & \multirow{3}{*}{O(n) 或 O(1)} & 是否有1 \\
+none() & & 是否全0 \\
+all() & & 是否全1 \\
+\hline
+operator[] & O(1) & 随机访问 \\
+\hline
+operator\& & \multirow{6}{*}{O(n)} & 与运算 \\
+operator| & & 或运算 \\
+operator\textasciicircum & & 异或运算 \\
+operator\textasciitilde & & 取反 \\
+operator<< & & 左移 \\
+operator>> & & 右移 \\
+\hline
+\end{tabular}
+\end{center}
+\begin{lstlisting}
+// 00000000
+std::bitset<8> b1;
+// 00101010（42的二进制）
+std::bitset<8> b2(42);
+// 字符串初始化
+std::bitset<8> b3("11001010");
+
+// 2. 位操作
+// 第0位置1: 00000001
+b1.set(0);
+// 第0位置0: 00000000
+b1.reset(0);
+// 第2位翻转: 00000100
+b1.flip(2);
+// 所有位置1: 11111111
+b1.set();
+// 所有位置0: 00000000
+b1.reset();
+
+// 3. 访问与查询
+// 输出第1位（0-based，输出1）
+std::cout << b2[1] << std::endl;
+// 安全访问（越界抛异常）
+std::cout << b2.test(1) << std::endl;
+// 统计1的个数（42 → 3）
+std::cout << b2.count() << std::endl;
+// 是否有1（true）
+std::cout << b2.any() << std::endl;
+// 是否全0（false）
+std::cout << b2.none() << std::endl;
+// 是否全1（false）
+std::cout << b2.all() << std::endl;
+
+// 4. 位运算
+// b1 : 00000000
+// b2 : 00101010
+// b3 : 11001010
+// 00000000
+std::cout << (b1 & b3) << std::endl;
+// 00101010
+std::cout << (b1 | b2) << std::endl;
+// 11100000
+std::cout << (b2 ^ b3) << std::endl;
+// 10101000
+std::cout << (b2 << 2) << std::endl;
+\end{lstlisting}

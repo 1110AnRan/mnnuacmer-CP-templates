@@ -1,0 +1,85 @@
+\subsubsection{queue}
+\begin{center}
+\begin{tabular}{| c | c | c |}
+\hline
+\multicolumn{3}{| c |}{C++ queue 关键特性总结} \\
+\hline
+常用函数/方法 & 时间复杂度 & 说明 \\
+\hline
+push(const T\& value) & \multirow{6}{*}{O(1)} & 在队尾插入元素 \\
+pop() & & 移除队头元素 \\
+front() & & 访问队头元素 \\
+back() & & 访问队尾元素 \\
+empty() & & 检查队列是否为空 \\
+size() & & 返回队列中元素数量 \\
+\hline
+\end{tabular}
+\end{center}
+\begin{lstlisting}
+// 1. 创建queue的不同方式
+std::queue<int> q1; // 默认使用deque作为底层容器
+
+// 2. 基本操作
+// 入队操作
+q1.push(10);
+q1.push(20);
+q1.push(30);
+q1.emplace(40); // C++11 直接构造元素
+
+// 访问队首和队尾元素
+// 10
+std::cout << "队首元素: " << q1.front() << std::endl;
+// 40
+std::cout << "队尾元素: " << q1.back() << std::endl;
+
+// 出队操作
+q1.pop(); // 移除10
+// 20
+std::cout << "\n出队后队首元素: " << q1.front() << std::endl;
+// 40
+std::cout << "当前队尾元素: " << q1.back() << std::endl;
+
+// 3. 容量查询
+std::cout << "\n队列是否为空: " << (q1.empty() ? "是" : "否") << std::endl;
+std::cout << "队列的大小: " << q1.size() << std::endl;
+
+// 4. 队列的交换
+std::queue<int> q2;
+q2.push(100);
+q2.push(200);
+
+std::cout << "\n交换前:";
+std::cout << "\nq1 大小: " << q1.size();
+std::cout << "\nq4 大小: " << q2.size();
+
+q1.swap(q2); // 交换内容
+
+std::cout << "\n\n交换后:";
+std::cout << "\nq1 大小: " << q1.size();
+std::cout << "\nq4 大小: " << q2.size();
+// 100
+std::cout << "\nq1 队首: " << q1.front();
+// 200
+std::cout << "\nq1 队尾: " << q1.back();
+
+// 5. 清空队列
+std::cout << "\n\n清空q4: ";
+while (!q2.empty()) {
+    std::cout << q2.front() << " ";
+    q2.pop();
+}
+std::cout << "\n清空后大小: " << q2.size() << std::endl;
+
+// 6. 注意事项
+std::queue<int> emptyQueue;
+
+// 危险操作：空队列时访问front()或back()会导致未定义行为
+// std::cout << emptyQueue.front(); // 崩溃!
+
+// 安全访问方式
+if (!emptyQueue.empty()) {
+    std::cout << "\n队首元素: " << emptyQueue.front() << std::endl;
+} else {
+    std::cout << "\n\n警告：尝试访问空队列！" << std::endl;
+}
+\end{lstlisting}

@@ -363,3 +363,34 @@ struct custom_hash_32 {
 
 // unordered_map<int, int, custom_hash_xxx> cnt;
 \end{lstlisting}
+
+\subsection{对拍}
+\begin{lstlisting}
+#include <iostream>
+using namespace std;
+int main() {
+    // 编译data文件
+    system("g++ data.cpp -o data.exe --std=c++11");
+    // 编译 std文件
+    system("g++ std.cpp -o std.exe --std=c++11");
+    // 编译force文件
+    system("g++ force.cpp -o force.exe --std=c++11"); 
+    int rp = 0;
+    while (!rp) {
+        // 生成数据，将结果存储在 input.txt中
+        system("data.exe > input.txt");
+        // 调用暴力代码，将结果存储在 fout.txt 中
+        system("force.exe < input.txt > fout.txt");
+        // 调用对比代码，将结果存储在 sout.txt 中
+        system("std.exe < input.txt > sout.txt");
+        rp = system("fc fout.txt sout.txt"); // 进行对比
+        if (rp == 0)  {
+            cout << "AC" << endl;
+        } else {
+            cout << "WA" << endl;
+            break;
+        }
+    }
+    return 0;
+}
+\end{lstlisting}

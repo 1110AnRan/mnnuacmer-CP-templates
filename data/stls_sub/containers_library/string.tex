@@ -1,0 +1,244 @@
+\subsubsection{string}
+\begin{center}
+\begin{tabular}{ | c | c | c | }
+\hline
+\multicolumn{3}{|c|}{C++ string 关键特性总结} \\
+\hline
+常用函数/方法 & 复杂度 & 说明 \\
+\hline
+operator[] & \multirow{5}{*}{O(1)} & 无边界检查 \\
+front() & & 首字符 \\
+back() & & 末字符 \\
+size() & & 当前字符数 \\
+empty() & & 是否为空 \\
+\hline
+insert(size\_t pos, const string\& str) & \multirow{2}{*}{O(n $+$ m)} & 插入字符串 \\
+replace(size\_t pos, size\_t len, const string\& str) & & 替换子串 \\
+\hline
+insert(size\_t pos, char ch) & \multirow{2}{*}{O(n)} & 插入单个字符 \\
+erase(size\_t pos, size\_t len) & & 删除子串 \\
+\hline
+substr(size\_t pos, size\_t len) & O(m) & 获取子串 \\
+\hline
+find(const string\&, size\_t pos) & \multirow{2}{*}{O(n $\ast$ m)} & 子串查找\\
+rfind(const string\&, size\_t pos) &  & 反向子串查找 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{lstlisting}
+// ====================== 1. 创建和初始化 ======================
+// 空字符串
+std::string s1;
+// 从C风格字符串初始化
+std::string s2 = "Hello";
+// 构造函数初始化
+std::string s3("World!");
+// 重复字符: "AAAAA"
+std::string s4(5, 'A');
+// 拷贝构造: "Hello"
+std::string s5(s2);
+// 子串: "ell" (从索引1开始，长度3)
+std::string s6(s2, 1, 3);
+// 连接: "Hello World!"
+std::string s7 = s2 + " " + s3;
+
+// C++11初始化列表
+std::string s8{'C', '+', '+', '1', '1'}; // "C++11"
+
+std::cout << "1. 初始化:\n";
+std::cout << "s1: \"" << s1 << "\"\n";
+std::cout << "s2: \"" << s2 << "\"\n";
+std::cout << "s3: \"" << s3 << "\"\n";
+std::cout << "s4: \"" << s4 << "\"\n";
+std::cout << "s5: \"" << s5 << "\"\n";
+std::cout << "s6: \"" << s6 << "\"\n";
+std::cout << "s7: \"" << s7 << "\"\n";
+std::cout << "s8: \"" << s8 << "\"\n\n";
+
+// ====================== 2. 基本操作 ======================
+// 访问字符
+std::cout << "2. 访问字符:\n";
+std::cout << "s7[0]: '" << s7[0] << "'\n";
+std::cout << "s7.at(6): '" << s7.at(6) << "'\n";
+std::cout << "s7.front(): '" << s7.front() << "'\n";
+std::cout << "s7.back(): '" << s7.back() << "'\n\n";
+
+// 安全访问 vs 不安全访问
+// 算法竞赛中请自行控制访问范围
+try {
+    std::cout << "尝试访问越界位置: ";
+    std::cout << s7.at(100); // 抛出std::out_of_range异常
+} catch (const std::out_of_range& e) {
+    std::cout << "错误: " << e.what() << "\n\n";
+}
+
+// ====================== 3. 容量操作 ======================
+std::cout << "3. 容量操作:\n";
+std::cout << "s7长度: " << s7.length() << "\n";
+std::cout << "s7大小: " << s7.size() << "\n"; // 与length()相同
+std::cout << "s7容量: " << s7.capacity() << "\n";
+std::cout << "s7是否为空: " << (s7.empty() ? "是" : "否") << "\n";
+
+// 改变容量
+s7.reserve(50);
+std::cout << "reserve(50)后容量: " << s7.capacity() << "\n";
+
+// 缩小容量
+s7.shrink_to_fit(); // C++11
+std::cout << "shrink_to_fit()后容量: " << s7.capacity() << "\n\n";
+
+// ====================== 4. 修改操作 ======================
+// 追加
+// "Hello C++"
+s2.append(" C++");
+// "World! Programming"
+s3 += " Programming";
+
+// 插入
+// "Hello Awesome C++"
+s2.insert(5, " Awesome"); 
+
+// 删除
+// 删除" Awesome" -> "Hello C++"
+s2.erase(5, 8);
+// 从索引5开始删除到结尾 -> "Hello"
+s2.erase(5);
+
+// 替换
+// 替换"Hello"为"Hi" -> "Hi"
+s2.replace(0, 5, "Hi");
+
+// 清空
+std::string temp = "Temporary";
+temp.clear();
+std::cout << "4. 修改操作后:\n";
+std::cout << "s2: \"" << s2 << "\"\n";
+std::cout << "s3: \"" << s3 << "\"\n";
+std::cout << "temp: \"" << temp << "\" (清空后)\n\n";
+
+// ====================== 5. 字符串操作 ======================
+// 子串
+// "World"
+std::string substr = s7.substr(6, 5);
+std::cout << "5. 字符串操作:\n";
+std::cout << "s7.substr(6,5): \"" << substr << "\"\n";
+
+// 比较
+std::string comp1 = "apple";
+std::string comp2 = "banana";
+int result = comp1.compare(comp2);
+std::cout << "比较 \"apple\" 和 \"banana\": ";
+if (result < 0) std::cout << "apple < banana\n";
+else if (result > 0) std::cout << "apple > banana\n";
+else std::cout << "相等\n";
+
+// 查找
+std::string text = "The quick brown fox jumps over the lazy dog";
+size_t pos = text.find("fox");
+std::cout << "查找 \"fox\": 位置 " << pos << "\n";
+
+// 反向查找
+pos = text.rfind("the");
+std::cout << "反向查找 \"the\": 位置 " << pos << "\n";
+
+// 查找字符集合中任意字符
+pos = text.find_first_of("aeiou");
+std::cout << "第一个元音在位置: " << pos << " ('" << text[pos] << "')\n";
+
+// 查找不在字符集合中的字符
+pos = text.find_first_not_of("abcdefghijklmnopqrstuvwxyz ");
+std::cout << "第一个非字母字符: ";
+if (pos == std::string::npos) {
+    std::cout << "未找到\n";
+} else {
+    std::cout << "位置 " << pos << " ('" << text[pos] << "')\n";
+}
+std::cout << "\n";
+
+// ====================== 6. 输入/输出 ======================
+std::cout << "6. 输入/输出操作:\n";
+std::cout << "请输入你的名字: ";
+std::string name;
+// std::getline(std::cin, name); // 读取整行
+std::cin >> name;                // 常用
+std::cout << "你好, " << name << "!\n\n";
+
+// ====================== 7. 字符串转换 ======================
+std::cout << "7. 字符串转换:\n";
+// 数字转字符串
+int num = 42;
+double pi = 3.14159;
+std::string num_str = std::to_string(num);
+std::string pi_str = std::to_string(pi);
+std::cout << "数字转字符串: " << num_str << ", " << pi_str << "\n";
+
+// 字符串转数字
+std::string year_str = "2023";
+int year = std::stoi(year_str);
+std::string hex_str = "FF";
+int hex_num = std::stoi(hex_str, nullptr, 16); // 十六进制转换
+std::cout << "字符串转数字: " << year << ", 十六进制FF=" << hex_num << "\n";
+
+// 使用字符串流
+std::ostringstream oss;
+oss << "PI=" << std::fixed << std::setprecision(2) << pi;
+std::cout << "字符串流: " << oss.str() << "\n\n";
+
+// ====================== 8. 字符处理 ======================
+std::cout << "8. 字符处理:\n";
+std::string mixed = "Hello World! 123";
+
+// 遍历处理
+for (char& c : mixed) {
+    if (std::isalpha(c)) {
+        c = std::toupper(c);
+    }
+}
+std::cout << "转为大写: " << mixed << "\n";
+
+// 使用算法
+std::string palindrome = "radar";
+bool is_palindrome = std::equal(
+    palindrome.begin(), 
+    palindrome.begin() + palindrome.size()/2,
+    palindrome.rbegin()
+);
+std::cout << "\"" << palindrome << "\" 是回文? " 
+            << (is_palindrome ? "是" : "否") << "\n\n";
+
+// ====================== 9. 高级操作 ======================
+std::cout << "9. 高级操作:\n";
+// C++17 string_view
+// 不复制数据
+std::string_view view = "这是一个string_view"; 
+std::cout << "string_view: " << view << "\n";
+
+// 原始字符串字面量 (C++11)
+std::string raw_str = R"(原始字符串: 可以包含特殊字符如 \n\t"" 而不转义)";
+std::cout << raw_str << "\n";
+
+// 多行字符串
+std::string multiline = R"(
+    这是一个
+    多行字符串
+    不需要换行符
+)";
+std::cout << "多行字符串:" << multiline << "\n";
+
+// 字符串分割
+std::string csv = "apple,banana,orange,grape";
+std::vector<std::string> fruits;
+size_t start = 0, end = 0;
+while ((end = csv.find(',', start)) != std::string::npos) {
+    fruits.push_back(csv.substr(start, end - start));
+    start = end + 1;
+}
+fruits.push_back(csv.substr(start));
+
+std::cout << "分割结果: ";
+for (const auto& fruit : fruits) {
+    std::cout << fruit << " | ";
+}
+std::cout << "\n\n";
+\end{lstlisting}

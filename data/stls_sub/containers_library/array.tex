@@ -1,0 +1,64 @@
+\subsubsection{array}
+\begin{center}
+\begin{tabular}{| c | c | c |}
+\hline
+\multicolumn{3}{| c |}{C++ array 关键特性总结} \\
+\hline
+常用函数/方法 & 时间复杂度 & 说明 \\
+\hline
+operator[] & \multirow{5}{*}{O(1)} & 随机访问（无边界检查） \\
+front() & & 访问首元素 \\
+back() & & 访问尾元素 \\
+size() & & 返回元素数量（编译时确定） \\
+empty() & & 检查是否为空（编译时确定）\\
+\hline
+fill(const T\& value) & O(n) & 填充所有元素为指定值 \\
+\hline
+\end{tabular}
+\end{center}
+\begin{lstlisting}
+// 默认构造（元素未初始化！）
+std::array<int, 5> arr1; 
+
+// 列表初始化（C++11）
+std::array<int, 5> arr2 = {1, 2, 3, 4, 5};
+
+// 统一初始化（C++11）
+std::array<std::string, 3> arr3{"Apple", "Banana", "Cherry"};
+
+// 拷贝构造
+std::array<int, 5> arr4 = arr2;
+
+// 聚合初始化（C++17）
+std::array arr5 = {1.1, 2.2, 3.3}; // 自动推导类型和大小
+
+// 下标访问
+std::cout << "索引1:" << arr2[1] << std::endl;
+
+// 首尾元素访问
+std::cout << "首元素: " << arr2.front() << std::endl; // 1
+std::cout << "尾元素: " << arr2.back() << std::endl;  // 5
+
+// 容量操作
+std::cout << "大小:" << arr2.size() << std::endl;
+
+// 范围for循环
+std::cout << "范围遍历:";
+for(auto x : arr2) {
+    std::cout << x << " "; 
+}
+std::cout << std::endl;
+
+// arr1:[10, 10, 10, 10, 10]
+arr1.fill(10);
+
+// 使用STL算法修改
+std::sort(arr2.begin(), arr2.end()); // 升序排序
+std::reverse(arr2.begin(), arr2.end()); // 反转
+
+// 结构化绑定
+std::array<int, 3> point = {10, 20, 30};
+auto [x, y, z] = point;
+// 10 20 30
+std::cout << "坐标: (" << x << ", " << y << ", " << z << ")";
+\end{lstlisting}

@@ -1,0 +1,59 @@
+\subsubsection{map}
+\begin{center}
+\begin{tabular}{| c | c | c |}
+\hline
+\multicolumn{3}{| c |}{C++ map 关键特性总结} \\
+\hline
+常用函数/方法 & 时间复杂度 & 说明 \\
+\hline
+insert({const K\& key, const V\& value}) & \multirow{9}{*}{O(log n)} & 键存在时插入失败 \\
+operator[](const K\& key) & & 键不存在时自动插入默认值 \\
+erase(const K\& key) & & 删除指定键 \\
+find(const K\& key) & & 返回迭代器或 end() \\
+equal\_range(const K\& key) & & 返回单元素的迭代器范围 \\
+lower\_bound(const K\& key) & & 首个 $>=$ key 的元素 \\
+upper\_bound(const K\& key) & & 首个 $>$ key 的元素 \\
+extract(const K\& key) & & 安全转移元素 \\
+count(const K\& key) & & 键重复次数 \\
+\hline
+\end{tabular}
+\end{center}
+\begin{lstlisting}
+std::map<int, int> mp;
+mp[1] = 2;
+mp[2] = 3;
+mp[3] = 4;
+
+// 2
+std::cout << mp[1] << std::endl;
+// 0
+std::cout << mp[4] << std::endl;
+
+mp.erase(4);
+// 4 is not in mp
+if(mp.count(4)) {
+    std::cout << "4 is in mp" << std::endl;
+} else {
+    std::cout << "4 is not in mp" << std::endl;
+}
+auto it = mp.find(3);
+// 3 is in mp
+// 3->4
+if(it != mp.end()) {
+    std::cout << "3 is in mp" << std::endl;
+    std::cout << 3 << "->" << it->second << std::endl;
+} else {
+    std::cout << "3 is not in mp" << std::endl;
+}
+
+it = mp.lower_bound(2);
+// ...
+
+
+mp.extract(2);
+// 1->2
+// 3->4
+for(auto [x, y] : mp) {
+    std::cout << x << "->" << y << std::endl;
+}
+\end{lstlisting}
